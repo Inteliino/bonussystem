@@ -4,9 +4,9 @@ WORKDIR /app
 
 COPY bonussystem/ .
 
-RUN chmod +x mvnw
+RUN apt-get update && apt-get install -y maven
 
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 EXPOSE 8080
 
