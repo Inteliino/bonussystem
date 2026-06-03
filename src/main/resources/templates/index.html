@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="lv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bonus System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="topbar">
+        <div class="logo-area">
+            <h1>Bonus System</h1>
+            <p>Maiņu prēmiju uzskaite</p>
+        </div>
+
+        <div class="menu-buttons">
+            <a class="btn primary" href="#mainMenu" onclick="showSection('mainMenu')">Main menu</a>
+            <a class="btn ghost" href="#monthlySummary" onclick="showSection('monthlySummary')">Kopsavilkums pa mēnešiem</a>
+            <a class="btn ghost" href="#shiftComparison" onclick="showSection('shiftComparison')">Maiņu salīdzinājums</a>
+            <a class="btn ghost" href="#shiftBonus" onclick="showSection('shiftBonus')">Prēmijas pa maiņām</a>
+            <a class="btn ghost" href="#employeeReport" onclick="showSection('employeeReport')">Darbinieka atskaite</a>
+            <a class="btn ghost" th:href="@{/employees}">Darbinieki</a>
+            <a class="btn ghost" th:href="@{/users}">Lietotāji</a>
+            <a class="btn ghost" th:href="@{/bonus-rules}">Bonusa nolikums</a>
+            <a class="btn ghost danger" th:href="@{/logout}">Iziet</a>
+        </div>
+    </div>
+
+    <div id="mainMenu">
+
+        <div class="section-card">
+            <h2>Pievienot maiņu</h2>
+
+            <form class="form-grid" th:action="@{/add-record}" method="post" onsubmit="prepareAssortmentsBeforeSubmit()">
+
+                <select name="employeeId" id="employeeSelect" required>
+                    <option value="">Izvēlies darbinieku</option>
+                    <option th:each="employee : ${employees}"
+                            th:value="${employee.id}"
+                            th:data-tabeles="${employee.tabelesNr}"
+                            th:text="${employee.name}">
+                    </option>
+                </select>
+
+                <select name="shiftName" required>
+                    <option value="">Izvēlies maiņu</option>
+                    <option value="1. maiņa">1. maiņa</option>
+                    <option value="2. maiņa">2. maiņa</option>
+                    <option value="3. maiņa">3. maiņa</option>
+                    <option value="4. maiņa">4. maiņa</option>
+                </select>
+
+                <input type="date" name="date">
+                <input type="text" id="tabelesNrInput" placeholder="Tabeles Nr" readonly>
+
+                <input type="hidden" name="roboti" id="robotiInput" value="0">
+                <input type="hidden" name="cirsana" id="cirsanaInput" value="0">
+                <input type="hidden" name="pilnie" id="pilnieInput" value="0">
+                <input type="hidden" name="pirmaPakape" id="pirmaPakapeInput" value="0">
+                <input type="hidden" name="otraPakape" id="otraPakapeInput" value="0">
+                <input type="hidden" name="treshaPakape" id="treshaPakapeInput" value="0">
+                <input type="hidden" name="ceturtaPakape" id="ceturtaPakapeInput" value="0">
+
+                <div style="grid-column:1 / -1;">
+                    <h3>Sortimenti no nolikuma</h3>
+                    <p>Izvēlies sortimentu un ievadi daudzumu.</p>
+                </div>
+
+                <select class="assortment-select">
+                    <option value="">Izvēlies sortimentu</option>
+                    <option th:each="assortment : ${assortments}"
+                            th:value="${assortment.id}"
+                            th:data-type="${assortment.type}"
+                            th:data-grade="${assortment.gradeName}"
+                            th:text="${assortment.name}">
+                    </option>
+                </select>
+                <input type="text" class="assortment-amount" placeholder="Daudzums">
+
+                <select class="assortment-select">
+                    <option value="">Izvēlies sortimentu</option>
+                    <option th:each="assortment : ${assortments}"
+                            th:value="${assortment.id}"
+                            th:data-type="${assortment.type}"
+                            th:data-grade="${assortment.gradeName}"
+                            th:text="${assortment.name}">
+                    </option>
+                </select>
+                <input type="text" class="assortment-amount" placeholder="Daudzums">
+
+                <select class="assortment-select">
+                    <option value="">Izvēlies sortimentu</option>
+                    <option th:each="assortment : ${assortments}"
+                            th:value="${assortment.id}"
+                            th:data-type="${assortment.type}"
+                            th:data-grade="${assortment.gradeName}"
+                            th:text="${assortment.name}">
+                    </option>
+                </select>
+                <input type="text" class="assortment-amount" placeholder="Daudzums">
+
+                <select class="assortment-select">
+                    <option value="">Izvēlies sortimentu</option>
+                    <option th:each="assortment : ${assortments}"
+                            th:value="${assortment.id}"
+                            th:data-type="${assortment.type}"
+                            th:data-grade="${assortment.gradeName}"
+                            th:text="${assortment.name}">
+                    </option>
+                </select>
+                <input type="text" class="assortment-amount" placeholder="Daudzums">
+
+                <select class="assortment-select">
+                    <option value="">Izvēlies sortimentu</option>
+                    <option th:each="assortment : ${assortments}"
+                            th:value="${assortment.id}"
+                            th:data-type="${assortment.type}"
+                            th:data-grade="${assortment.gradeName}"
+                            th:text="${assortment.name}">
+                    </option>
+                </select>
+                <input type="text" class="assortment-amount" placeholder="Daudzums">
+
+                <button type="submit" class="btn primary">Pievienot</button>
+            </form>
+        </div>
+
+        <div class="section-card">
+            <h2>Maiņu saraksts</h2>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Datums</th>
+                    <th>Maiņa</th>
+                    <th>Darbinieks</th>
+                    <th>Bonuss</th>
+                    <th>Darbības</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="record : ${records}">
+                    <td th:text="${record.date}"></td>
+                    <td th:text="${record.shiftName}"></td>
+                    <td th:text="${record.employee != null ? record.employee.name : '-'}"></td>
+
+                    <td class="bonus-green"
+                        th:text="${#numbers.formatDecimal(record.bonus,1,2)} + ' €'">
+                    </td>
+
+                    <td>
+                        <a class="small-btn blue" th:href="@{/edit-record/{id}(id=${record.id})}">Labot</a>
+                        <a class="small-btn red" th:href="@{/delete-record/{id}(id=${record.id})}">Dzēst</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="monthlySummary" class="section-card" style="display:none;">
+        <div class="section-header">
+            <div>
+                <h2>Kopsavilkums pa mēnešiem</h2>
+                <p>Gada izmaksu pārskats</p>
+            </div>
+
+            <div class="summary-total"
+                 th:text="${#numbers.formatDecimal(yearlyTotal,1,2)} + ' €'">
+                0.00 €
+            </div>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Mēnesis</th>
+                <th>Kopējā summa</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="entry : ${monthlySummary}">
+                <td th:text="${entry.key}"></td>
+                <td class="bonus-green"
+                    th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="shiftComparison" class="section-card" style="display:none;">
+        <div class="section-header">
+            <div>
+                <h2>Maiņu salīdzinājums</h2>
+                <p>Maiņu izmaksu pārskats</p>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <div class="chart-row" th:each="entry : ${shiftSummary}">
+                <div class="chart-label" th:text="${entry.key}">1. maiņa</div>
+
+                <div class="chart-bar-wrapper">
+                    <div class="chart-bar"
+                         th:style="'width:' + ${entry.value * 3} + 'px'">
+                    </div>
+                </div>
+
+                <div class="chart-value"
+                     th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'">
+                    0.00 €
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shiftBonus" class="section-card" style="display:none;">
+        <div class="section-header">
+            <div>
+                <h2>Prēmijas pa maiņām</h2>
+                <p>Filtrē pēc mēneša, maiņas un darbinieka</p>
+            </div>
+
+            <div class="summary-total" id="shiftBonusTotal">0,00 €</div>
+        </div>
+
+        <div class="filter-grid">
+            <input type="month" id="shiftBonusMonth">
+
+            <select id="shiftBonusShift">
+                <option value="">Visas maiņas</option>
+                <option value="1. maiņa">1. maiņa</option>
+                <option value="2. maiņa">2. maiņa</option>
+                <option value="3. maiņa">3. maiņa</option>
+                <option value="4. maiņa">4. maiņa</option>
+            </select>
+
+            <select id="shiftBonusEmployee">
+                <option value="">Visi darbinieki</option>
+                <option th:each="employee : ${employees}"
+                        th:value="${employee.id}"
+                        th:text="${employee.name}">
+                </option>
+            </select>
+
+            <button type="button" class="btn primary" onclick="filterShiftBonus()">Rādīt</button>
+        </div>
+
+        <table style="margin-top:22px;">
+            <thead>
+            <tr>
+                <th>Datums</th>
+                <th>Maiņa</th>
+                <th>Darbinieks</th>
+                <th>Bonuss</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr class="shift-bonus-row"
+                th:each="record : ${records}"
+                th:data-date="${record.date}"
+                th:data-shift="${record.shiftName}"
+                th:data-employee="${record.employee != null ? record.employee.id : ''}"
+                th:data-bonus="${record.bonus}">
+                <td th:text="${record.date}"></td>
+                <td th:text="${record.shiftName}"></td>
+                <td th:text="${record.employee != null ? record.employee.name : '-'}"></td>
+                <td class="bonus-green"
+                    th:text="${#numbers.formatDecimal(record.bonus,1,2)} + ' €'">
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="employeeReport" class="section-card" style="display:none;">
+        <div class="section-header">
+            <div>
+                <h2>Darbinieka prēmiju atskaite</h2>
+                <p>Izvēlies darbinieku un mēnesi</p>
+            </div>
+        </div>
+
+        <form class="filter-grid" th:action="@{/}" method="get" onsubmit="setEmployeeReportHash()">
+            <select name="summaryEmployeeId" required>
+                <option value="">Izvēlies darbinieku</option>
+                <option th:each="employee : ${employees}"
+                        th:value="${employee.id}"
+                        th:selected="${summaryEmployeeId != null and employee.id == summaryEmployeeId}"
+                        th:text="${employee.name}">
+                </option>
+            </select>
+
+            <input type="month" name="summaryMonth" th:value="${selectedSummaryMonth}" required>
+
+            <button type="submit" class="btn primary">Rādīt atskaiti</button>
+        </form>
+
+        <div th:if="${selectedSummaryEmployee != null}" class="employee-report-wrapper">
+
+            <div class="employee-report-title">
+                <div>
+                    <h3 th:text="${selectedSummaryEmployee.name}">Darbinieks</h3>
+                    <p th:text="${selectedSummaryMonth != null && !selectedSummaryMonth.isBlank() ? selectedSummaryMonth : 'Visi mēneši'}">
+                        Mēnesis
+                    </p>
+                </div>
+
+                <div class="employee-bonus-box">
+                    <span>Kopējais bonuss</span>
+                    <strong th:text="${#numbers.formatDecimal(employeeTotalBonus,1,2)} + ' €'">0.00 €</strong>
+                </div>
+            </div>
+
+            <div class="employee-stats-grid">
+
+                <div class="stat-card big">
+                    <span>Maiņu skaits</span>
+                    <strong th:text="${employeeShiftCount}">0</strong>
+                </div>
+
+                <div class="stat-card big green">
+                    <span>Kopējais nepilno ratu skaits</span>
+                    <strong th:text="${#numbers.formatDecimal(totalNepilnieKopa,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji roboti</span>
+                    <strong th:text="${#numbers.formatDecimal(avgRoboti,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji cērtamie</span>
+                    <strong th:text="${#numbers.formatDecimal(avgCirsana,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji pilnie</span>
+                    <strong th:text="${#numbers.formatDecimal(avgPilnie,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card orange">
+                    <span>Vidēji nepilnie kopā</span>
+                    <strong th:text="${#numbers.formatDecimal(avgNepilnieKopa,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji pakāpe I</span>
+                    <strong th:text="${#numbers.formatDecimal(avgPirmaPakape,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji pakāpe II</span>
+                    <strong th:text="${#numbers.formatDecimal(avgOtraPakape,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji pakāpe III</span>
+                    <strong th:text="${#numbers.formatDecimal(avgTreshaPakape,1,1)}">0.0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Vidēji pakāpe IV</span>
+                    <strong th:text="${#numbers.formatDecimal(avgCeturtaPakape,1,1)}">0.0</strong>
+                </div>
+
+            </div>
+
+            <div th:if="${employeeRecords.size() == 0}" class="empty-report">
+                Šim darbiniekam izvēlētajā mēnesī nav datu.
+            </div>
+
+            <table th:if="${employeeRecords.size() > 0}" style="margin-top:24px;">
+                <thead>
+                <tr>
+                    <th>Datums</th>
+                    <th>Maiņa</th>
+                    <th>Roboti</th>
+                    <th>Ciršana</th>
+                    <th>Pilnie</th>
+                    <th>I pak.</th>
+                    <th>II pak.</th>
+                    <th>III pak.</th>
+                    <th>IV pak.</th>
+                    <th>Bonuss</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="record : ${employeeRecords}">
+                    <td th:text="${record.date}"></td>
+                    <td th:text="${record.shiftName}"></td>
+
+                    <td th:text="${record.roboti == 0 ? '-' : #numbers.formatDecimal(record.roboti,1,1)}"></td>
+                    <td th:text="${record.cirsana == 0 ? '-' : #numbers.formatDecimal(record.cirsana,1,1)}"></td>
+                    <td th:text="${record.pilnie == 0 ? '-' : #numbers.formatDecimal(record.pilnie,1,1)}"></td>
+
+                    <td th:text="${record.pirmaPakape == 0 ? '-' : #numbers.formatDecimal(record.pirmaPakape,1,1)}"></td>
+                    <td th:text="${record.otraPakape == 0 ? '-' : #numbers.formatDecimal(record.otraPakape,1,1)}"></td>
+                    <td th:text="${record.treshaPakape == 0 ? '-' : #numbers.formatDecimal(record.treshaPakape,1,1)}"></td>
+                    <td th:text="${record.ceturtaPakape == 0 ? '-' : #numbers.formatDecimal(record.ceturtaPakape,1,1)}"></td>
+
+                    <td class="bonus-green"
+                        th:text="${#numbers.formatDecimal(record.bonus,1,2)} + ' €'">
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const employeeSelect = document.getElementById("employeeSelect");
+    const tabelesNrInput = document.getElementById("tabelesNrInput");
+
+    if (employeeSelect) {
+        employeeSelect.addEventListener("change", function () {
+            const selected = employeeSelect.options[employeeSelect.selectedIndex];
+            tabelesNrInput.value = selected.getAttribute("data-tabeles") || "";
+        });
+    }
+
+    function parseAmount(value) {
+        if (!value) return 0;
+        return Number(String(value).replace(",", ".")) || 0;
+    }
+
+    function prepareAssortmentsBeforeSubmit() {
+        let roboti = 0;
+        let cirsana = 0;
+        let pilnie = 0;
+        let pirmaPakape = 0;
+        let otraPakape = 0;
+        let treshaPakape = 0;
+        let ceturtaPakape = 0;
+
+        const selects = document.querySelectorAll(".assortment-select");
+        const amounts = document.querySelectorAll(".assortment-amount");
+
+        selects.forEach((select, index) => {
+            const option = select.options[select.selectedIndex];
+            const amount = parseAmount(amounts[index].value);
+
+            if (!option || !select.value || amount <= 0) {
+                return;
+            }
+
+            const type = option.getAttribute("data-type") || "";
+            const grade = option.getAttribute("data-grade") || "";
+
+            if (type === "ROBOTS") {
+                roboti += amount;
+            } else if (type === "CIRSANA") {
+                cirsana += amount;
+            } else if (type === "PILNIE") {
+                pilnie += amount;
+            } else if (type === "NEPILNIE") {
+                if (grade === "I") {
+                    pirmaPakape += amount;
+                } else if (grade === "II") {
+                    otraPakape += amount;
+                } else if (grade === "III") {
+                    treshaPakape += amount;
+                } else if (grade === "IV") {
+                    ceturtaPakape += amount;
+                }
+            }
+        });
+
+        document.getElementById("robotiInput").value = roboti;
+        document.getElementById("cirsanaInput").value = cirsana;
+        document.getElementById("pilnieInput").value = pilnie;
+        document.getElementById("pirmaPakapeInput").value = pirmaPakape;
+        document.getElementById("otraPakapeInput").value = otraPakape;
+        document.getElementById("treshaPakapeInput").value = treshaPakape;
+        document.getElementById("ceturtaPakapeInput").value = ceturtaPakape;
+    }
+
+    function hideAllSections() {
+        document.getElementById("mainMenu").style.display = "none";
+        document.getElementById("monthlySummary").style.display = "none";
+        document.getElementById("shiftComparison").style.display = "none";
+        document.getElementById("shiftBonus").style.display = "none";
+        document.getElementById("employeeReport").style.display = "none";
+    }
+
+    function showSection(id) {
+        hideAllSections();
+
+        const section = document.getElementById(id);
+        if (section) {
+            section.style.display = "block";
+        }
+
+        if (id === "shiftBonus") {
+            filterShiftBonus();
+        }
+    }
+
+    function setEmployeeReportHash() {
+        setTimeout(function () {
+            window.location.hash = "employeeReport";
+        }, 10);
+    }
+
+    function formatEuro(value) {
+        return value.toLocaleString("lv-LV", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " €";
+    }
+
+    function parseBonus(value) {
+        if (!value) return 0;
+        return Number(String(value).replace(",", ".")) || 0;
+    }
+
+    function filterShiftBonus() {
+        const monthInput = document.getElementById("shiftBonusMonth");
+        const shiftInput = document.getElementById("shiftBonusShift");
+        const employeeInput = document.getElementById("shiftBonusEmployee");
+
+        if (!monthInput || !shiftInput || !employeeInput) return;
+
+        const month = monthInput.value;
+        const shift = shiftInput.value;
+        const employee = employeeInput.value;
+
+        const rows = document.querySelectorAll(".shift-bonus-row");
+
+        let total = 0;
+
+        rows.forEach(row => {
+            const rowDate = row.getAttribute("data-date") || "";
+            const rowMonth = rowDate.substring(0, 7);
+            const rowShift = row.getAttribute("data-shift") || "";
+            const rowEmployee = row.getAttribute("data-employee") || "";
+            const rowBonus = parseBonus(row.getAttribute("data-bonus"));
+
+            const monthOk = !month || rowMonth === month;
+            const shiftOk = !shift || rowShift === shift;
+            const employeeOk = !employee || rowEmployee === employee;
+
+            if (monthOk && shiftOk && employeeOk) {
+                row.style.display = "";
+                total += rowBonus;
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        const totalEl = document.getElementById("shiftBonusTotal");
+        if (totalEl) totalEl.innerText = formatEuro(total);
+    }
+
+    window.addEventListener("load", function () {
+        const hasEmployeeReportParams = window.location.href.includes("summaryEmployeeId");
+
+        if (window.location.hash === "#monthlySummary") {
+            showSection("monthlySummary");
+        } else if (window.location.hash === "#shiftComparison") {
+            showSection("shiftComparison");
+        } else if (window.location.hash === "#shiftBonus") {
+            showSection("shiftBonus");
+        } else if (window.location.hash === "#employeeReport" || hasEmployeeReportParams) {
+            showSection("employeeReport");
+        } else {
+            showSection("mainMenu");
+        }
+    });
+
+    window.addEventListener("hashchange", function () {
+        if (window.location.hash === "#monthlySummary") {
+            showSection("monthlySummary");
+        } else if (window.location.hash === "#shiftComparison") {
+            showSection("shiftComparison");
+        } else if (window.location.hash === "#shiftBonus") {
+            showSection("shiftBonus");
+        } else if (window.location.hash === "#employeeReport") {
+            showSection("employeeReport");
+        } else {
+            showSection("mainMenu");
+        }
+    });
+</script>
+
+</body>
+</html>

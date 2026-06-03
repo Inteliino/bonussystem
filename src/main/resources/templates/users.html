@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="lv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lietotāji</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="app">
+
+    <div class="topbar">
+        <div>
+            <h1>Lietotāji</h1>
+            <p>Admin var pievienot un labot piekļuves</p>
+        </div>
+
+        <div class="top-actions">
+            <a class="btn ghost" th:href="@{/}">Dashboard</a>
+            <a class="btn ghost" th:href="@{/employees}">Darbinieki</a>
+            <a class="btn ghost" th:href="@{/logout}">Iziet</a>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Pievienot lietotāju</h2>
+
+        <form class="record-form" th:action="@{/users/add}" method="post">
+            <input type="text" name="username" placeholder="Lietotājvārds" required>
+            <input type="text" name="password" placeholder="Parole" required>
+
+            <select name="role" required>
+                <option value="USER">USER - parasts lietotājs</option>
+                <option value="ADMIN">ADMIN - pilna piekļuve</option>
+            </select>
+
+            <button type="submit">Pievienot</button>
+        </form>
+    </div>
+
+    <div class="panel">
+        <h2>Esošie lietotāji</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Lietotājvārds</th>
+                <th>Parole</th>
+                <th>Loma</th>
+                <th>Darbības</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="user : ${users}">
+                <form th:action="@{/users/edit/{id}(id=${user.id})}" method="post">
+                    <td th:text="${user.id}"></td>
+                    <td><input type="text" name="username" th:value="${user.username}"></td>
+                    <td><input type="text" name="password" th:value="${user.password}"></td>
+                    <td>
+                        <select name="role">
+                            <option value="USER" th:selected="${user.role == 'USER'}">USER</option>
+                            <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="small-btn" type="submit">Saglabāt</button>
+                        <a class="small-btn danger" th:href="@{/users/delete/{id}(id=${user.id})}">Dzēst</a>
+                    </td>
+                </form>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

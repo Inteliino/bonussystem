@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="lv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Bonus System - Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="new-login-body">
+
+<div class="new-login-page">
+
+    <h1>Bonus System</h1>
+    <p>Maiņu prēmiju uzskaites sistēma</p>
+
+    <div class="new-login-features">
+        <div>🔒 Droša piekļuve</div>
+        <div>👥 Darbinieku pārvaldība</div>
+        <div>📊 Prēmiju statistika</div>
+    </div>
+
+    <div class="new-login-card">
+
+        <h2>Ielogoties</h2>
+
+        <form method="post" action="/login">
+
+            <input type="text"
+                   name="username"
+                   placeholder="admin"
+                   required>
+
+            <input type="password"
+                   name="password"
+                   placeholder="•••••"
+                   required>
+
+            <button type="submit">
+                Ieiet sistēmā
+            </button>
+
+        </form>
+
+        <div th:if="${param.error}" class="login-error">
+            Nepareizs lietotājvārds vai parole
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
