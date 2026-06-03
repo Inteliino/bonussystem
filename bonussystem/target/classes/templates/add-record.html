@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="lv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pievienot ierakstu</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<div class="page">
+    <div class="card form-card">
+
+        <h1>Pievienot maiņas ierakstu</h1>
+        <p class="subtitle" th:text="${employee.name}">Darbinieks</p>
+
+        <form th:action="@{/add-record}" method="post" th:object="${record}">
+
+            <input type="hidden" name="employeeId" th:value="${employee.id}">
+
+            <label>Datums</label>
+            <input type="date" th:field="*{date}">
+
+            <label>Rati</label>
+            <input type="text" th:field="*{rati}" placeholder="Piemēram: 30,5">
+
+            <label>NEP</label>
+            <input type="text" th:field="*{nep}" placeholder="Ja nav, atstāj tukšu">
+
+            <label>Komentārs</label>
+            <input type="text" th:field="*{comment}" placeholder="Komentārs">
+
+            <div class="actions">
+                <button type="submit" class="btn primary">Saglabāt</button>
+                <a class="btn secondary" th:href="@{/employee/{id}(id=${employee.id})}">Atpakaļ</a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
