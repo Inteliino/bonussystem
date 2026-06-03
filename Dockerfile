@@ -1,10 +1,13 @@
-FROM eclipse-temurin:17-jdk
+FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-COPY . .
+COPY bonussystem .
 
 RUN chmod +x mvnw
+
 RUN ./mvnw clean package -DskipTests
 
-CMD ["sh", "-c", "java -jar target/*.jar"]
+EXPOSE 8080
+
+CMD ["java","-jar","target/bonussystem-0.0.1-SNAPSHOT.jar"]
