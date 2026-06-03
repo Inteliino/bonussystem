@@ -2,7 +2,7 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-COPY bonussystem .
+COPY bonussystem/ .
 
 RUN chmod +x mvnw
 
