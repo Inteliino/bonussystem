@@ -118,7 +118,11 @@ public class HomeController {
 
         double avgRoboti = 0.0;
         double avgCirsana = 0.0;
+        double avgCirsanaPilnie = 0.0;
+        double avgCirsanaNepilnie = 0.0;
         double avgPilnie = 0.0;
+        double avgNepilnie = 0.0;
+
         double avgPirmaPakape = 0.0;
         double avgOtraPakape = 0.0;
         double avgTreshaPakape = 0.0;
@@ -153,19 +157,32 @@ public class HomeController {
 
             double totalRoboti = employeeRecords.stream().mapToDouble(WorkRecord::getRoboti).sum();
             double totalCirsana = employeeRecords.stream().mapToDouble(WorkRecord::getCirsana).sum();
+            double totalCirsanaPilnie = employeeRecords.stream().mapToDouble(WorkRecord::getCirsanaPilnie).sum();
+            double totalCirsanaNepilnie = employeeRecords.stream().mapToDouble(WorkRecord::getCirsanaNepilnie).sum();
+
             double totalPilnie = employeeRecords.stream().mapToDouble(WorkRecord::getPilnie).sum();
+            double totalNepilnie = employeeRecords.stream().mapToDouble(WorkRecord::getNepilnie).sum();
 
             double totalPirmaPakape = employeeRecords.stream().mapToDouble(WorkRecord::getPirmaPakape).sum();
             double totalOtraPakape = employeeRecords.stream().mapToDouble(WorkRecord::getOtraPakape).sum();
             double totalTreshaPakape = employeeRecords.stream().mapToDouble(WorkRecord::getTreshaPakape).sum();
             double totalCeturtaPakape = employeeRecords.stream().mapToDouble(WorkRecord::getCeturtaPakape).sum();
 
-            totalNepilnieKopa = totalPirmaPakape + totalOtraPakape + totalTreshaPakape + totalCeturtaPakape;
+            totalNepilnieKopa = totalNepilnie
+                    + totalCirsanaNepilnie
+                    + totalPirmaPakape
+                    + totalOtraPakape
+                    + totalTreshaPakape
+                    + totalCeturtaPakape;
 
             if (employeeShiftCount > 0) {
                 avgRoboti = totalRoboti / employeeShiftCount;
                 avgCirsana = totalCirsana / employeeShiftCount;
+                avgCirsanaPilnie = totalCirsanaPilnie / employeeShiftCount;
+                avgCirsanaNepilnie = totalCirsanaNepilnie / employeeShiftCount;
+
                 avgPilnie = totalPilnie / employeeShiftCount;
+                avgNepilnie = totalNepilnie / employeeShiftCount;
 
                 avgPirmaPakape = totalPirmaPakape / employeeShiftCount;
                 avgOtraPakape = totalOtraPakape / employeeShiftCount;
@@ -199,7 +216,11 @@ public class HomeController {
         model.addAttribute("employeeShiftCount", employeeShiftCount);
         model.addAttribute("avgRoboti", avgRoboti);
         model.addAttribute("avgCirsana", avgCirsana);
+        model.addAttribute("avgCirsanaPilnie", avgCirsanaPilnie);
+        model.addAttribute("avgCirsanaNepilnie", avgCirsanaNepilnie);
         model.addAttribute("avgPilnie", avgPilnie);
+        model.addAttribute("avgNepilnie", avgNepilnie);
+
         model.addAttribute("avgPirmaPakape", avgPirmaPakape);
         model.addAttribute("avgOtraPakape", avgOtraPakape);
         model.addAttribute("avgTreshaPakape", avgTreshaPakape);
@@ -216,7 +237,10 @@ public class HomeController {
                             @RequestParam(required = false) String date,
                             @RequestParam(required = false) String roboti,
                             @RequestParam(required = false) String cirsana,
+                            @RequestParam(required = false) String cirsanaPilnie,
+                            @RequestParam(required = false) String cirsanaNepilnie,
                             @RequestParam(required = false) String pilnie,
+                            @RequestParam(required = false) String nepilnie,
                             @RequestParam(required = false) String pirmaPakape,
                             @RequestParam(required = false) String otraPakape,
                             @RequestParam(required = false) String treshaPakape,
@@ -233,13 +257,18 @@ public class HomeController {
 
         record.setRoboti(parseDouble(roboti));
         record.setCirsana(parseDouble(cirsana));
+        record.setCirsanaPilnie(parseDouble(cirsanaPilnie));
+        record.setCirsanaNepilnie(parseDouble(cirsanaNepilnie));
+
         record.setPilnie(parseDouble(pilnie));
+        record.setNepilnie(parseDouble(nepilnie));
+
         record.setPirmaPakape(parseDouble(pirmaPakape));
         record.setOtraPakape(parseDouble(otraPakape));
         record.setTreshaPakape(parseDouble(treshaPakape));
         record.setCeturtaPakape(parseDouble(ceturtaPakape));
 
-        bonusCalculatorService.calculate(record);
+        bonusCalculatorService.calculateBonus(record);
 
         workRecordRepository.save(record);
 
@@ -264,7 +293,10 @@ public class HomeController {
                              @RequestParam(required = false) String date,
                              @RequestParam(required = false) String roboti,
                              @RequestParam(required = false) String cirsana,
+                             @RequestParam(required = false) String cirsanaPilnie,
+                             @RequestParam(required = false) String cirsanaNepilnie,
                              @RequestParam(required = false) String pilnie,
+                             @RequestParam(required = false) String nepilnie,
                              @RequestParam(required = false) String pirmaPakape,
                              @RequestParam(required = false) String otraPakape,
                              @RequestParam(required = false) String treshaPakape,
@@ -280,13 +312,18 @@ public class HomeController {
 
         record.setRoboti(parseDouble(roboti));
         record.setCirsana(parseDouble(cirsana));
+        record.setCirsanaPilnie(parseDouble(cirsanaPilnie));
+        record.setCirsanaNepilnie(parseDouble(cirsanaNepilnie));
+
         record.setPilnie(parseDouble(pilnie));
+        record.setNepilnie(parseDouble(nepilnie));
+
         record.setPirmaPakape(parseDouble(pirmaPakape));
         record.setOtraPakape(parseDouble(otraPakape));
         record.setTreshaPakape(parseDouble(treshaPakape));
         record.setCeturtaPakape(parseDouble(ceturtaPakape));
 
-        bonusCalculatorService.calculate(record);
+        bonusCalculatorService.calculateBonus(record);
 
         workRecordRepository.save(record);
 
