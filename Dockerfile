@@ -6,7 +6,7 @@ COPY bonussystem/pom.xml .
 COPY bonussystem/src ./src
 
 RUN apt-get update && apt-get install -y maven
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 EXPOSE 8080
 
