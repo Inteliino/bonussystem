@@ -2,19 +2,22 @@
 <html lang="lv" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Bonus System - Login</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <title>Maiņu attinēju prēmijas</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" href="/css/style.css">
 </head>
 
 <body class="new-login-body">
 
 <div class="new-login-page">
 
-    <h1>Bonus System</h1>
+<div class="login-logo-box">
+    <div class="css-logo">S</div>
+    <span>Valmiera Glass</span>
+</div>
+    <h1>Maiņu attinēju prēmijas</h1>
     <p>Maiņu prēmiju uzskaites sistēma</p>
 
     <div class="new-login-features">
-        <div>🔒 Droša piekļuve</div>
         <div>👥 Darbinieku pārvaldība</div>
         <div>📊 Prēmiju statistika</div>
     </div>
@@ -25,24 +28,24 @@
 
         <form method="post" action="/login">
 
-            <input type="text"
-                   name="username"
-                   placeholder="admin"
-                   required>
+            <div class="login-input-wrap">
+                <span>👤</span>
+                <input type="text" name="username" placeholder="Lietotājvārds" required>
+            </div>
 
-            <input type="password"
-                   name="password"
-                   placeholder="•••••"
-                   required>
+            <div class="login-input-wrap">
+                <span>🔒</span>
+                <input type="password" name="password" placeholder="Parole" required>
+            </div>
 
-            <button type="submit">
-                Ieiet sistēmā
+            <button type="submit" class="login-submit">
+                Ieiet sistēmā <span>→</span>
             </button>
 
         </form>
 
         <div th:if="${param.error}" class="login-error">
-            Nepareizs lietotājvārds vai parole
+            Nepareizs lietotājvārds vai parole!
         </div>
 
     </div>

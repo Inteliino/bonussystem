@@ -35,7 +35,7 @@
                 <th>EUR</th>
                 <th>Virsnorma</th>
                 <th>EUR virs normas</th>
-                <th>Darbība</th>
+                <th th:if="${isAdmin}">Darbība</th>
             </tr>
             </thead>
 
@@ -48,7 +48,8 @@
                 <td th:text="${rule.priceValue}"></td>
                 <td th:text="${rule.overNormValue}"></td>
                 <td th:text="${rule.overNormPrice}"></td>
-                <td>
+
+                <td th:if="${isAdmin}">
                     <a class="small-btn blue" th:href="@{/bonus-rules/edit/{id}(id=${rule.id})}">Labot</a>
                     <a class="small-btn red" th:href="@{/bonus-rules/delete/{id}(id=${rule.id})}">Dzēst</a>
                 </td>
@@ -57,7 +58,7 @@
         </table>
     </div>
 
-    <div class="section-card">
+    <div class="section-card" th:if="${isAdmin}">
         <h2 th:text="${editRule != null ? 'Labot normu' : 'Pievienot normu'}">Pievienot normu</h2>
 
         <form class="form-grid" th:action="@{/bonus-rules/save}" method="post">
@@ -70,7 +71,8 @@
             <input type="number" step="0.01" name="normValue" placeholder="Norma"
                    th:value="${editRule != null ? editRule.normValue : ''}">
 
-            <input type="number" step="0.01" name="secondaryNormValue" placeholder="Kombinētā norma / Nepilnie normai"
+            <input type="number" step="0.01" name="secondaryNormValue"
+                   placeholder="Kombinētā norma / Nepilnie normai"
                    th:value="${editRule != null ? editRule.secondaryNormValue : ''}">
 
             <input type="number" step="0.01" name="stepValue" placeholder="Solis"
@@ -87,9 +89,7 @@
 
             <button type="submit" class="btn primary">Saglabāt normu</button>
 
-            <a th:if="${editRule != null}" class="btn ghost" th:href="@{/bonus-rules}">
-                Atcelt
-            </a>
+            <a th:if="${editRule != null}" class="btn ghost" th:href="@{/bonus-rules}">Atcelt</a>
         </form>
     </div>
 
@@ -102,7 +102,7 @@
                 <th>Pakāpe</th>
                 <th>Koeficients</th>
                 <th>EUR par pakāpi</th>
-                <th>Darbība</th>
+                <th th:if="${isAdmin}">Darbība</th>
             </tr>
             </thead>
 
@@ -111,27 +111,65 @@
                 <td th:text="${grade.gradeName}"></td>
                 <td th:text="${grade.coefficient}"></td>
                 <td th:text="${grade.pricePerUnit}"></td>
-                <td>
+
+                <td th:if="${isAdmin}">
+                    <a class="small-btn blue" th:href="@{/grade-rules/edit/{id}(id=${grade.id})}">Labot</a>
                     <a class="small-btn red" th:href="@{/grade-rules/delete/{id}(id=${grade.id})}">Dzēst</a>
                 </td>
             </tr>
             </tbody>
         </table>
 
-        <form class="form-grid" th:action="@{/grade-rules/save}" method="post">
-            <select name="gradeName" required>
-                <option value="">Izvēlies pakāpi</option>
-                <option value="I">I pakāpe</option>
-                <option value="II">II pakāpe</option>
-                <option value="III">III pakāpe</option>
-                <option value="IV">IV pakāpe</option>
-            </select>
+        <div th:if="${isAdmin}">
+            <h2 style="margin-top:22px;"
+                th:text="${editGrade != null ? 'Labot pakāpi' : 'Pievienot pakāpi'}">
+                Pievienot pakāpi
+            </h2>
 
-            <input type="number" step="0.01" name="coefficient" placeholder="Koeficients" required>
-            <input type="number" step="0.01" name="pricePerUnit" placeholder="EUR par pakāpi">
+            <form class="form-grid" th:action="@{/grade-rules/save}" method="post">
 
-            <button type="submit" class="btn primary">Saglabāt pakāpi</button>
-        </form>
+                <input type="hidden" name="id" th:value="${editGrade != null ? editGrade.id : ''}">
+
+                <select name="gradeName" required>
+                    <option value="">Izvēlies pakāpi</option>
+
+                    <option value="Nepilnie"
+                            th:selected="${editGrade != null and editGrade.gradeName == 'Nepilnie'}">
+                        Nepilnie
+                    </option>
+
+                    <option value="I"
+                            th:selected="${editGrade != null and editGrade.gradeName == 'I'}">
+                        I pakāpe
+                    </option>
+
+                    <option value="II"
+                            th:selected="${editGrade != null and editGrade.gradeName == 'II'}">
+                        II pakāpe
+                    </option>
+
+                    <option value="III"
+                            th:selected="${editGrade != null and editGrade.gradeName == 'III'}">
+                        III pakāpe
+                    </option>
+
+                    <option value="IV"
+                            th:selected="${editGrade != null and editGrade.gradeName == 'IV'}">
+                        IV pakāpe
+                    </option>
+                </select>
+
+                <input type="number" step="0.01" name="coefficient" placeholder="Koeficients"
+                       th:value="${editGrade != null ? editGrade.coefficient : ''}" required>
+
+                <input type="number" step="0.01" name="pricePerUnit" placeholder="EUR par pakāpi"
+                       th:value="${editGrade != null ? editGrade.pricePerUnit : ''}">
+
+                <button type="submit" class="btn primary">Saglabāt pakāpi</button>
+
+                <a th:if="${editGrade != null}" class="btn ghost" th:href="@{/bonus-rules}">Atcelt</a>
+            </form>
+        </div>
     </div>
 
     <div class="section-card">
@@ -144,7 +182,7 @@
                 <th>Tips</th>
                 <th>Pakāpe</th>
                 <th>Statuss</th>
-                <th>Darbība</th>
+                <th th:if="${isAdmin}">Darbība</th>
             </tr>
             </thead>
 
@@ -154,14 +192,15 @@
                 <td th:text="${assortment.type}"></td>
                 <td th:text="${assortment.gradeName}"></td>
                 <td th:text="${assortment.active ? 'Aktīvs' : 'Neaktīvs'}"></td>
-                <td>
+
+                <td th:if="${isAdmin}">
                     <a class="small-btn red" th:href="@{/assortments/delete/{id}(id=${assortment.id})}">Dzēst</a>
                 </td>
             </tr>
             </tbody>
         </table>
 
-        <form class="form-grid" th:action="@{/assortments/save}" method="post">
+        <form th:if="${isAdmin}" class="form-grid" th:action="@{/assortments/save}" method="post">
 
             <input type="text" name="name" placeholder="Sortimenta nosaukums" required>
 
@@ -175,6 +214,7 @@
 
             <select name="gradeName">
                 <option value="">Pakāpe tikai nepilnajiem</option>
+                <option value="Nepilnie">Nepilnie</option>
                 <option value="I">I pakāpe</option>
                 <option value="II">II pakāpe</option>
                 <option value="III">III pakāpe</option>
@@ -183,6 +223,47 @@
 
             <button type="submit" class="btn primary">Pievienot sortimentu</button>
         </form>
+    </div>
+
+    <div class="section-card" th:if="${isAdmin}">
+        <h2>Pārrēķināt bonusus izvēlētam mēnesim</h2>
+
+        <form class="form-grid" th:action="@{/bonus-rules/recalculate-month}" method="post">
+            <input type="number" name="year" placeholder="Gads, piemēram 2026" required>
+            <input type="number" name="month" placeholder="Mēnesis, piemēram 6" min="1" max="12" required>
+
+            <button type="submit" class="btn primary">Pārrēķināt mēnesi</button>
+        </form>
+    </div>
+
+    <div class="section-card" th:if="${isAdmin}">
+        <h2>Bonusa nolikuma izmaiņu vēsture</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Datums</th>
+                <th>Lietotājs</th>
+                <th>Tips</th>
+                <th>Nosaukums</th>
+                <th>Lauks</th>
+                <th>Bija</th>
+                <th>Tagad</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            <tr th:each="item : ${history}">
+                <td th:text="${item.changedAt}"></td>
+                <td th:text="${item.changedBy}"></td>
+                <td th:text="${item.objectType}"></td>
+                <td th:text="${item.objectName}"></td>
+                <td th:text="${item.fieldName}"></td>
+                <td th:text="${item.oldValue}"></td>
+                <td th:text="${item.newValue}"></td>
+            </tr>
+            </tbody>
+        </table>
     </div>
 
 </div>

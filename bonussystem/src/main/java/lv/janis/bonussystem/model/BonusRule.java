@@ -13,6 +13,8 @@ public class BonusRule {
     private String name;
 
     private double normValue;
+    private double secondaryNormValue;
+
     private double stepValue;
     private double priceValue;
     private double overNormValue;
@@ -43,6 +45,14 @@ public class BonusRule {
 
     public void setNormValue(double normValue) {
         this.normValue = normValue;
+    }
+
+    public double getSecondaryNormValue() {
+        return secondaryNormValue;
+    }
+
+    public void setSecondaryNormValue(double secondaryNormValue) {
+        this.secondaryNormValue = secondaryNormValue;
     }
 
     public double getStepValue() {

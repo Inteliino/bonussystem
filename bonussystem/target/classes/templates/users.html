@@ -5,27 +5,28 @@
     <title>Lietotāji</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
-<div class="app">
+<div class="container">
 
     <div class="topbar">
-        <div>
+        <div class="logo-area">
             <h1>Lietotāji</h1>
-            <p>Admin var pievienot un labot piekļuves</p>
+            <p>Admin var pievienot, labot un dzēst piekļuves</p>
         </div>
 
-        <div class="top-actions">
-            <a class="btn ghost" th:href="@{/}">Dashboard</a>
-            <a class="btn ghost" th:href="@{/employees}">Darbinieki</a>
-            <a class="btn ghost" th:href="@{/logout}">Iziet</a>
+        <div class="menu-buttons">
+            <a href="/" class="btn ghost">Dashboard</a>
+            <a href="/employees" class="btn ghost">Darbinieki</a>
+            <a href="/logout" class="btn ghost danger">Iziet</a>
         </div>
     </div>
 
-    <div class="panel">
+    <div class="section-card">
         <h2>Pievienot lietotāju</h2>
 
-        <form class="record-form" th:action="@{/users/add}" method="post">
+        <form method="post" action="/users/add" class="user-add-form">
             <input type="text" name="username" placeholder="Lietotājvārds" required>
             <input type="text" name="password" placeholder="Parole" required>
 
@@ -34,44 +35,81 @@
                 <option value="ADMIN">ADMIN - pilna piekļuve</option>
             </select>
 
-            <button type="submit">Pievienot</button>
+            <button type="submit" class="btn primary">Pievienot</button>
         </form>
     </div>
 
-    <div class="panel">
-        <h2>Esošie lietotāji</h2>
+    <div class="section-card">
 
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>Lietotājvārds</th>
-                <th>Parole</th>
-                <th>Loma</th>
-                <th>Darbības</th>
-            </tr>
-            </thead>
+        <div class="section-header">
+            <div>
+                <h2>Esošie lietotāji</h2>
+                <p>Šeit vari mainīt lietotājvārdu, paroli un lomu</p>
+            </div>
 
-            <tbody>
-            <tr th:each="user : ${users}">
-                <form th:action="@{/users/edit/{id}(id=${user.id})}" method="post">
+            <div class="summary-total">
+                Lietotāji: <span th:text="${#lists.size(users)}"></span>
+            </div>
+        </div>
+
+        <div class="employee-table-wrapper">
+
+            <table class="employee-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Lietotājvārds</th>
+                    <th>Parole</th>
+                    <th>Loma</th>
+                    <th>Darbības</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="user : ${users}">
+
                     <td th:text="${user.id}"></td>
-                    <td><input type="text" name="username" th:value="${user.username}"></td>
-                    <td><input type="text" name="password" th:value="${user.password}"></td>
+
                     <td>
-                        <select name="role">
+                        <form th:action="@{/users/edit/{id}(id=${user.id})}" method="post" th:id="'userForm' + ${user.id}">
+                            <input type="text" name="username" th:value="${user.username}" required>
+                        </form>
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               name="password"
+                               th:value="${user.password}"
+                               th:form="'userForm' + ${user.id}"
+                               required>
+                    </td>
+
+                    <td>
+                        <select name="role" th:form="'userForm' + ${user.id}">
                             <option value="USER" th:selected="${user.role == 'USER'}">USER</option>
                             <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
                         </select>
                     </td>
-                    <td>
-                        <button class="small-btn" type="submit">Saglabāt</button>
-                        <a class="small-btn danger" th:href="@{/users/delete/{id}(id=${user.id})}">Dzēst</a>
+
+                    <td class="employee-actions">
+                        <button type="submit"
+                                class="small-btn blue"
+                                th:form="'userForm' + ${user.id}">
+                            Saglabāt
+                        </button>
+
+                        <a th:href="@{/users/delete/{id}(id=${user.id})}"
+                           class="small-btn red"
+                           onclick="return confirm('Tiešām dzēst šo lietotāju?')">
+                            Dzēst
+                        </a>
                     </td>
-                </form>
-            </tr>
-            </tbody>
-        </table>
+
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
     </div>
 
 </div>

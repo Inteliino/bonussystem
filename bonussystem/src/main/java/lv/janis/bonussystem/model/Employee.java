@@ -11,8 +11,8 @@ public class Employee {
 
     private String name;
     private String tabelesNr;
-    private String grade;
-    private double coefficient;
+
+    private boolean active = true;
 
     public Long getId() {
         return id;
@@ -26,12 +26,8 @@ public class Employee {
         return tabelesNr;
     }
 
-    public String getGrade() {
-        return grade;
-    }
-
-    public double getCoefficient() {
-        return coefficient;
+    public boolean isActive() {
+        return active;
     }
 
     public void setId(Long id) {
@@ -46,11 +42,7 @@ public class Employee {
         this.tabelesNr = tabelesNr;
     }
 
-    public void setGrade(String grade) {
-        this.grade = grade;
-    }
-
-    public void setCoefficient(double coefficient) {
-        this.coefficient = coefficient;
+    public void setActive(boolean active) {
+        this.active = active;
     }
 }

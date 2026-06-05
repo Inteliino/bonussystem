@@ -2,271 +2,196 @@ package lv.janis.bonussystem.service;
 
 import lv.janis.bonussystem.BonusRuleRepository;
 import lv.janis.bonussystem.GradeRuleRepository;
+import lv.janis.bonussystem.WorkRecordRepository;
 import lv.janis.bonussystem.model.BonusRule;
 import lv.janis.bonussystem.model.GradeRule;
 import lv.janis.bonussystem.model.WorkRecord;
-
 import org.springframework.stereotype.Service;
 
 @Service
 public class BonusCalculatorService {
 
-    private final BonusRuleRepository bonusRuleRepository;
     private final GradeRuleRepository gradeRuleRepository;
+    private final BonusRuleRepository bonusRuleRepository;
+    private final WorkRecordRepository workRecordRepository;
 
-    public BonusCalculatorService(BonusRuleRepository bonusRuleRepository,
-                                  GradeRuleRepository gradeRuleRepository) {
-        this.bonusRuleRepository = bonusRuleRepository;
+    public BonusCalculatorService(GradeRuleRepository gradeRuleRepository,
+                                  BonusRuleRepository bonusRuleRepository,
+                                  WorkRecordRepository workRecordRepository) {
         this.gradeRuleRepository = gradeRuleRepository;
+        this.bonusRuleRepository = bonusRuleRepository;
+        this.workRecordRepository = workRecordRepository;
     }
 
-    public void calculate(WorkRecord record) {
+    public double calculateBonus(WorkRecord record) {
+
+        BonusRule robotsRule = getRule("Robots");
+        BonusRule pilnieRule = getRule("Pilnie");
+        BonusRule nepilnieRule = getRule("Nepilnie");
+        BonusRule pilnieTikaiRule = getRule("Pilnie tikai");
+        BonusRule certamieRule = getRule("Cērtamie");
+        BonusRule certamieNepilnieRule = getRule("Cērtamie nepilnie");
+
+        double pirmaCoef = getCoefficient("I", 1.2);
+        double otraCoef = getCoefficient("II", 1.1);
+        double treshaCoef = getCoefficient("III", 0.88);
+        double ceturtaCoef = getCoefficient("IV", 0.8);
+
+        double coefNepilnie =
+                record.getNepilnie()
+                        + record.getCirsanaNepilnie()
+                        + record.getPirmaPakape() * pirmaCoef
+                        + record.getOtraPakape() * otraCoef
+                        + record.getTreshaPakape() * treshaCoef
+                        + record.getCeturtaPakape() * ceturtaCoef;
+
         double bonus = 0.0;
+        double realRati = 0.0;
 
-        bonus += calculateRobots(record.getRoboti());
-        bonus += calculateCirsana(record);
-        bonus += calculatePilnieAndNepilnie(record);
-
-        double realRati = record.getRoboti()
-                + record.getCirsana()
-                + record.getPilnie()
-                + effectiveNepilnie(
-                    record.getPirmaPakape(),
-                    record.getOtraPakape(),
-                    record.getTreshaPakape(),
-                    record.getCeturtaPakape()
-                );
-
-        record.setRealRati(round(realRati));
-        record.setBonus(round(bonus));
-    }
-
-    private double calculateRobots(double amount) {
-        BonusRule rule = bonusRuleRepository.findByNameIgnoreCase("Robots");
-
-        if (rule == null || amount <= 0) {
-            return 0.0;
+        if (record.getRoboti() > 0) {
+            bonus += calculateRobots(record.getRoboti(), robotsRule);
+            realRati += record.getRoboti();
         }
 
+        if (record.getCirsana() > 0 || record.getCirsanaPilnie() > 0) {
+            bonus += record.getCirsana() * certamieRule.getPriceValue();
+            bonus += record.getCirsanaPilnie() * certamieRule.getPriceValue();
+            bonus += coefNepilnie * certamieNepilnieRule.getPriceValue();
+
+            realRati += record.getCirsana();
+            realRati += record.getCirsanaPilnie();
+            realRati += coefNepilnie;
+        }
+
+        if (record.getPilnie() > 0) {
+            bonus += calculatePilnie(
+                    record.getPilnie(),
+                    coefNepilnie,
+                    pilnieRule,
+                    pilnieTikaiRule
+            );
+
+            realRati += record.getPilnie();
+            realRati += coefNepilnie;
+        }
+
+        if (record.getPilnie() <= 0
+                && record.getRoboti() <= 0
+                && record.getCirsana() <= 0
+                && record.getCirsanaPilnie() <= 0) {
+
+            bonus += calculateNepilnie(coefNepilnie, nepilnieRule);
+            realRati += coefNepilnie;
+        }
+
+        bonus = round2(bonus);
+        realRati = round2(realRati);
+
+        record.setBonus(bonus);
+        record.setRealRati(realRati);
+
+        return bonus;
+    }
+
+    public void recalculateMonth(int year, int month) {
+        for (WorkRecord record : workRecordRepository.findAll()) {
+            if (record.getDate() == null) {
+                continue;
+            }
+
+            if (record.getDate().getYear() == year
+                    && record.getDate().getMonthValue() == month) {
+                calculateBonus(record);
+                workRecordRepository.save(record);
+            }
+        }
+    }
+
+    private double calculateRobots(double roboti, BonusRule rule) {
         double norm = rule.getNormValue();
         double step = rule.getStepValue();
         double price = rule.getPriceValue();
         double overStep = rule.getOverNormValue();
         double overPrice = rule.getOverNormPrice();
 
-        if (step <= 0) {
-            return 0.0;
-        }
-
-        if (amount <= norm) {
-            return (amount / step) * price;
+        if (roboti <= norm) {
+            return (roboti / step) * price;
         }
 
         double bonus = (norm / step) * price;
-
-        if (overStep > 0) {
-            bonus += ((amount - norm) / overStep) * overPrice;
-        }
+        bonus += ((roboti - norm) / overStep) * overPrice;
 
         return bonus;
     }
 
-    private double calculateCirsana(WorkRecord record) {
-        double bonus = 0.0;
+    private double calculatePilnie(double pilnie,
+                                   double nepilnieCoef,
+                                   BonusRule pilnieRule,
+                                   BonusRule pilnieTikaiRule) {
 
-        BonusRule cirsanaRule = bonusRuleRepository.findByNameIgnoreCase("Cērtamie");
+        double bestBonus = 0.0;
 
-        if (cirsanaRule != null && record.getCirsana() > 0) {
-            double step = cirsanaRule.getStepValue();
+        double pilnieNorm = pilnieRule.getNormValue();
+        double nepilnieNorm = pilnieRule.getSecondaryNormValue();
+        double normaBonus = pilnieRule.getPriceValue();
+        double pilnieOverPrice = pilnieRule.getOverNormPrice();
 
-            if (step <= 0) {
-                step = 1;
-            }
+        double totalEquivalent = pilnie + (nepilnieCoef * 2.0);
+        double normEquivalent = pilnieNorm + (nepilnieNorm * 2.0);
 
-            bonus += (record.getCirsana() / step) * cirsanaRule.getPriceValue();
+        if (totalEquivalent >= normEquivalent) {
+            double bonus = normaBonus;
+            bonus += (totalEquivalent - normEquivalent) * pilnieOverPrice;
+            bestBonus = Math.max(bestBonus, bonus);
         }
 
-        BonusRule cirsanaNepilnieRule = bonusRuleRepository.findByNameIgnoreCase("Cērtamie nepilnie");
+        double pilnieTikaiNorm = pilnieTikaiRule.getNormValue();
 
-        if (cirsanaNepilnieRule != null && record.getCirsana() > 0) {
-            double nepilnieCount = record.getPirmaPakape()
-                    + record.getOtraPakape()
-                    + record.getTreshaPakape()
-                    + record.getCeturtaPakape();
+        if (pilnie >= pilnieTikaiNorm) {
+            double bonus = pilnieTikaiRule.getPriceValue();
+            bonus += (pilnie - pilnieTikaiNorm) * pilnieTikaiRule.getOverNormPrice();
+            bonus += nepilnieCoef * pilnieRule.getOverNormPrice() * 2.0;
 
-            double step = cirsanaNepilnieRule.getStepValue();
-
-            if (step <= 0) {
-                step = 1;
-            }
-
-            bonus += (nepilnieCount / step) * cirsanaNepilnieRule.getPriceValue();
+            bestBonus = Math.max(bestBonus, bonus);
         }
 
-        return bonus;
+        return bestBonus;
     }
 
-    private double calculatePilnieAndNepilnie(WorkRecord record) {
-        BonusRule pilnieRule = bonusRuleRepository.findByNameIgnoreCase("Pilnie");
-        BonusRule nepilnieRule = bonusRuleRepository.findByNameIgnoreCase("Nepilnie");
+    private double calculateNepilnie(double nepilnieCoef, BonusRule rule) {
+        double norm = rule.getNormValue();
 
-        if (pilnieRule == null || nepilnieRule == null) {
+        if (nepilnieCoef < norm) {
             return 0.0;
         }
 
-        double pilnie = record.getPilnie();
+        double bonus = rule.getPriceValue();
+        bonus += (nepilnieCoef - norm) * rule.getOverNormPrice();
 
-        double p1 = record.getPirmaPakape();
-        double p2 = record.getOtraPakape();
-        double p3 = record.getTreshaPakape();
-        double p4 = record.getCeturtaPakape();
-
-        double effectiveNepilnie = effectiveNepilnie(p1, p2, p3, p4);
-
-        double pilnieNorm = pilnieRule.getNormValue();
-        double comboNepilnieNorm = pilnieRule.getSecondaryNormValue();
-
-        double nepilnieOnlyNorm = nepilnieRule.getNormValue();
-
-        double baseComboBonus = pilnieRule.getPriceValue();
-        double baseNepilnieBonus = nepilnieRule.getPriceValue();
-
-        double pilnieOverPrice = pilnieRule.getOverNormPrice();
-        double nepilnieOverPrice = nepilnieRule.getOverNormPrice();
-
-        double bonus = 0.0;
-
-        boolean hasPilnie = pilnie > 0;
-        boolean hasNepilnie = effectiveNepilnie > 0;
-
-        if (hasPilnie && hasNepilnie) {
-            boolean comboReached = pilnie >= pilnieNorm && effectiveNepilnie >= comboNepilnieNorm;
-
-            if (!comboReached) {
-                return 0.0;
-            }
-
-            bonus += baseComboBonus;
-
-            if (pilnie > pilnieNorm) {
-                bonus += (pilnie - pilnieNorm) * pilnieOverPrice;
-            }
-
-            double nepilnieOverRaw = calculateNepilnieRawOverNorm(
-                    p1, p2, p3, p4,
-                    comboNepilnieNorm
-            );
-
-            bonus += nepilnieOverRaw * nepilnieOverPrice;
-
-            return bonus;
-        }
-
-        if (!hasPilnie && hasNepilnie) {
-            boolean nepilnieReached = effectiveNepilnie >= nepilnieOnlyNorm;
-
-            if (!nepilnieReached) {
-                return 0.0;
-            }
-
-            bonus += baseNepilnieBonus;
-
-            double nepilnieOverRaw = calculateNepilnieRawOverNorm(
-                    p1, p2, p3, p4,
-                    nepilnieOnlyNorm
-            );
-
-            bonus += nepilnieOverRaw * nepilnieOverPrice;
-
-            return bonus;
-        }
-
-        if (hasPilnie && !hasNepilnie) {
-            boolean pilnieReached = pilnie >= pilnieNorm;
-
-            if (!pilnieReached) {
-                return 0.0;
-            }
-
-            bonus += baseComboBonus;
-
-            if (pilnie > pilnieNorm) {
-                bonus += (pilnie - pilnieNorm) * pilnieOverPrice;
-            }
-
-            return bonus;
-        }
-
-        return 0.0;
+        return bonus;
     }
 
-    private double calculateNepilnieRawOverNorm(double p1,
-                                                double p2,
-                                                double p3,
-                                                double p4,
-                                                double norm) {
+    private BonusRule getRule(String name) {
+        BonusRule rule = bonusRuleRepository.findByNameIgnoreCase(name);
 
-        double k1 = getCoefficient("I");
-        double k2 = getCoefficient("II");
-        double k3 = getCoefficient("III");
-        double k4 = getCoefficient("IV");
-
-        double currentNorm = 0.0;
-
-        double remainingP1 = p1;
-        double remainingP2 = p2;
-        double remainingP3 = p3;
-        double remainingP4 = p4;
-
-        if (currentNorm < norm && remainingP1 > 0) {
-            double need = norm - currentNorm;
-            double use = Math.min(remainingP1, Math.ceil(need / k1));
-            currentNorm += use * k1;
-            remainingP1 -= use;
+        if (rule == null) {
+            throw new RuntimeException("Nav atrasts bonusa nolikums: " + name);
         }
 
-        if (currentNorm < norm && remainingP2 > 0) {
-            double need = norm - currentNorm;
-            double use = Math.min(remainingP2, Math.ceil(need / k2));
-            currentNorm += use * k2;
-            remainingP2 -= use;
-        }
-
-        if (currentNorm < norm && remainingP3 > 0) {
-            double need = norm - currentNorm;
-            double use = Math.min(remainingP3, Math.ceil(need / k3));
-            currentNorm += use * k3;
-            remainingP3 -= use;
-        }
-
-        if (currentNorm < norm && remainingP4 > 0) {
-            double need = norm - currentNorm;
-            double use = Math.min(remainingP4, Math.ceil(need / k4));
-            currentNorm += use * k4;
-            remainingP4 -= use;
-        }
-
-        return remainingP1 + remainingP2 + remainingP3 + remainingP4;
+        return rule;
     }
 
-    private double effectiveNepilnie(double p1, double p2, double p3, double p4) {
-        return p1 * getCoefficient("I")
-                + p2 * getCoefficient("II")
-                + p3 * getCoefficient("III")
-                + p4 * getCoefficient("IV");
+    private double getCoefficient(String gradeName, double defaultValue) {
+        return gradeRuleRepository.findAll()
+                .stream()
+                .filter(rule -> rule.getGradeName() != null)
+                .filter(rule -> rule.getGradeName().equalsIgnoreCase(gradeName))
+                .findFirst()
+                .map(GradeRule::getCoefficient)
+                .orElse(defaultValue);
     }
 
-    private double getCoefficient(String gradeName) {
-        GradeRule gradeRule = gradeRuleRepository.findByGradeName(gradeName);
-
-        if (gradeRule == null) {
-            return 1.0;
-        }
-
-        return gradeRule.getCoefficient();
-    }
-
-    private double round(double value) {
+    private double round2(double value) {
         return Math.round(value * 100.0) / 100.0;
     }
 }

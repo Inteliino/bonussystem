@@ -5,59 +5,149 @@
     <title>Labot ierakstu</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+
 <body>
 
-<div class="app">
+<div class="container">
 
     <div class="topbar">
-        <div>
+        <div class="logo-area">
             <h1>Labot maiņu</h1>
             <p>Koriģē ieraksta vērtības</p>
         </div>
 
-        <div class="top-actions">
+        <div class="menu-buttons">
             <a class="btn ghost" th:href="@{/}">Atpakaļ</a>
         </div>
     </div>
 
-    <div class="panel">
-        <form class="record-form" th:action="@{/edit-record/{id}(id=${record.id})}" method="post">
+    <div class="section-card">
+
+        <form class="form-grid"
+              th:action="@{/edit-record/{id}(id=${record.id})}"
+              method="post">
 
             <select name="employeeId" required>
                 <option th:each="employee : ${employees}"
                         th:value="${employee.id}"
-                        th:selected="${record.employee.id == employee.id}"
-                        th:text="${employee.name + ' | ' + employee.grade}">
+                        th:selected="${record.employee != null and record.employee.id == employee.id}"
+                        th:text="${employee.name}">
                 </option>
             </select>
 
+            <input type="text"
+                   th:value="${record.tabelesNr}"
+                   placeholder="Tabeles Nr"
+                   readonly>
+
+            <input type="date"
+                   name="date"
+                   th:value="${record.date}">
+
             <select name="shiftName" required>
-                <option value="1. maiņa" th:selected="${record.shiftName == '1. maiņa'}">1. maiņa</option>
-                <option value="2. maiņa" th:selected="${record.shiftName == '2. maiņa'}">2. maiņa</option>
-                <option value="3. maiņa" th:selected="${record.shiftName == '3. maiņa'}">3. maiņa</option>
-                <option value="4. maiņa" th:selected="${record.shiftName == '4. maiņa'}">4. maiņa</option>
+                <option value="1. maiņa"
+                        th:selected="${record.shiftName == '1. maiņa'}">
+                    1. maiņa
+                </option>
+
+                <option value="2. maiņa"
+                        th:selected="${record.shiftName == '2. maiņa'}">
+                    2. maiņa
+                </option>
+
+                <option value="3. maiņa"
+                        th:selected="${record.shiftName == '3. maiņa'}">
+                    3. maiņa
+                </option>
+
+                <option value="4. maiņa"
+                        th:selected="${record.shiftName == '4. maiņa'}">
+                    4. maiņa
+                </option>
             </select>
 
-            <input type="date" name="date" th:value="${record.date}">
+            <div style="grid-column:1 / -1;">
+                <h3>Darba vietas / daudzumi</h3>
+            </div>
 
-            <input type="text" name="tabelesNr" th:value="${record.tabelesNr}" placeholder="Tabeles Nr">
+            <div>
+                <label>Roboti</label>
+                <input type="text"
+                       name="roboti"
+                       th:value="${record.roboti}">
+            </div>
 
-            <input type="text" name="roboti" th:value="${record.roboti}" placeholder="Roboti">
+            <div>
+                <label>Ciršana</label>
+                <input type="text"
+                       name="cirsana"
+                       th:value="${record.cirsana}">
+            </div>
 
-            <input type="text" name="cirsana" th:value="${record.cirsana}" placeholder="Ciršana vecā">
-            <input type="text" name="cirsanaPilnie" th:value="${record.cirsanaPilnie}" placeholder="Ciršana pilnie">
-            <input type="text" name="cirsanaNepilnie" th:value="${record.cirsanaNepilnie}" placeholder="Ciršana nepilnie">
+            <div>
+                <label>Ciršana pilnie</label>
+                <input type="text"
+                       name="cirsanaPilnie"
+                       th:value="${record.cirsanaPilnie}">
+            </div>
 
-            <input type="text" name="pilnie" th:value="${record.pilnie}" placeholder="Pilnie">
+            <div>
+                <label>Ciršana nepilnie</label>
+                <input type="text"
+                       name="cirsanaNepilnie"
+                       th:value="${record.cirsanaNepilnie}">
+            </div>
 
-            <input type="text" name="pirmaPakape" th:value="${record.pirmaPakape}" placeholder="I pakāpe">
-            <input type="text" name="otraPakape" th:value="${record.otraPakape}" placeholder="II pakāpe">
-            <input type="text" name="treshaPakape" th:value="${record.treshaPakape}" placeholder="III pakāpe">
-            <input type="text" name="ceturtaPakape" th:value="${record.ceturtaPakape}" placeholder="IV pakāpe">
+            <div>
+                <label>Pilnie</label>
+                <input type="text"
+                       name="pilnie"
+                       th:value="${record.pilnie}">
+            </div>
 
-            <button type="submit">Saglabāt izmaiņas</button>
+            <div>
+                <label>Nepilnie</label>
+                <input type="text"
+                       name="nepilnie"
+                       th:value="${record.nepilnie}">
+            </div>
+
+            <div>
+                <label>Pakāpe I</label>
+                <input type="text"
+                       name="pirmaPakape"
+                       th:value="${record.pirmaPakape}">
+            </div>
+
+            <div>
+                <label>Pakāpe II</label>
+                <input type="text"
+                       name="otraPakape"
+                       th:value="${record.otraPakape}">
+            </div>
+
+            <div>
+                <label>Pakāpe III</label>
+                <input type="text"
+                       name="treshaPakape"
+                       th:value="${record.treshaPakape}">
+            </div>
+
+            <div>
+                <label>Pakāpe IV</label>
+                <input type="text"
+                       name="ceturtaPakape"
+                       th:value="${record.ceturtaPakape}">
+            </div>
+
+            <button type="submit"
+                    class="btn primary"
+                    style="grid-column:1 / -1;">
+                Saglabāt izmaiņas
+            </button>
 
         </form>
+
     </div>
 
 </div>

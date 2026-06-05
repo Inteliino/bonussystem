@@ -1,94 +1,103 @@
 package lv.janis.bonussystem.controller;
 
 import lv.janis.bonussystem.EmployeeRepository;
+import lv.janis.bonussystem.WorkRecordRepository;
 import lv.janis.bonussystem.model.Employee;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.beans.PropertyEditorSupport;
+import java.security.Principal;
 
 @Controller
 public class EmployeeController {
 
     private final EmployeeRepository employeeRepository;
+    private final WorkRecordRepository workRecordRepository;
 
-    public EmployeeController(EmployeeRepository employeeRepository) {
+    public EmployeeController(EmployeeRepository employeeRepository,
+                              WorkRecordRepository workRecordRepository) {
         this.employeeRepository = employeeRepository;
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder) {
-        binder.registerCustomEditor(Double.class, new PropertyEditorSupport() {
-            @Override
-            public void setAsText(String text) {
-                if (text == null || text.trim().isEmpty()) {
-                    setValue(0.0);
-                } else {
-                    setValue(Double.parseDouble(text.replace(",", ".")));
-                }
-            }
-        });
-
-        binder.registerCustomEditor(double.class, new PropertyEditorSupport() {
-            @Override
-            public void setAsText(String text) {
-                if (text == null || text.trim().isEmpty()) {
-                    setValue(0.0);
-                } else {
-                    setValue(Double.parseDouble(text.replace(",", ".")));
-                }
-            }
-        });
+        this.workRecordRepository = workRecordRepository;
     }
 
     @GetMapping("/employees")
-    public String employees(Model model) {
-        model.addAttribute("employees", employeeRepository.findAll());
+    public String employees(@RequestParam(required = false) String error,
+                            @RequestParam(required = false) String success,
+                            Model model) {
+
+        model.addAttribute("employees", employeeRepository.findAllByOrderByNameAsc());
+        model.addAttribute("error", error);
+        model.addAttribute("success", success);
+
         return "employee";
     }
 
     @PostMapping("/employees/add")
     public String addEmployee(@RequestParam String name,
-                              @RequestParam String tabelesNr,
-                              @RequestParam String grade,
-                              @RequestParam double coefficient) {
+                              @RequestParam String tabelesNr) {
+
+        if (employeeRepository.existsByTabelesNr(tabelesNr)) {
+            return "redirect:/employees?error=tabelesExists";
+        }
 
         Employee employee = new Employee();
-
         employee.setName(name);
         employee.setTabelesNr(tabelesNr);
-        employee.setGrade(grade);
-        employee.setCoefficient(coefficient);
+        employee.setActive(true);
 
         employeeRepository.save(employee);
 
-        return "redirect:/employees";
+        return "redirect:/employees?success=added";
     }
 
     @PostMapping("/employees/edit/{id}")
     public String editEmployee(@PathVariable Long id,
                                @RequestParam String name,
-                               @RequestParam String tabelesNr,
-                               @RequestParam String grade,
-                               @RequestParam double coefficient) {
+                               @RequestParam String tabelesNr) {
+
+        if (employeeRepository.existsByTabelesNrAndIdNot(tabelesNr, id)) {
+            return "redirect:/employees?error=tabelesExists";
+        }
 
         Employee employee = employeeRepository.findById(id).orElseThrow();
 
         employee.setName(name);
         employee.setTabelesNr(tabelesNr);
-        employee.setGrade(grade);
-        employee.setCoefficient(coefficient);
 
         employeeRepository.save(employee);
 
-        return "redirect:/employees";
+        return "redirect:/employees?success=saved";
+    }
+
+    @PostMapping("/employees/toggle-active/{id}")
+    public String toggleActive(@PathVariable Long id, Principal principal) {
+
+        if (principal == null || !principal.getName().equals("admin")) {
+            return "redirect:/employees?error=onlyAdmin";
+        }
+
+        Employee employee = employeeRepository.findById(id).orElseThrow();
+        employee.setActive(!employee.isActive());
+
+        employeeRepository.save(employee);
+
+        return "redirect:/employees?success=statusChanged";
     }
 
     @GetMapping("/employees/delete/{id}")
-    public String deleteEmployee(@PathVariable Long id) {
+    public String deleteEmployee(@PathVariable Long id, Principal principal) {
+
+        if (principal == null || !principal.getName().equals("admin")) {
+            return "redirect:/employees?error=onlyAdmin";
+        }
+
+        if (workRecordRepository.existsByEmployee_Id(id)) {
+            return "redirect:/employees?error=hasRecords";
+        }
+
         employeeRepository.deleteById(id);
-        return "redirect:/employees";
+
+        return "redirect:/employees?success=deleted";
     }
 }
