@@ -40,8 +40,16 @@ public class HomeController {
     public String home(Model model,
                        @RequestParam(required = false, defaultValue = "ALL") String shiftName,
                        @RequestParam(required = false) String month,
+                       @RequestParam(required = false) Integer year,
                        @RequestParam(required = false) Long summaryEmployeeId,
                        @RequestParam(required = false) String summaryMonth) {
+
+        int selectedYear = year != null ? year : LocalDate.now().getYear();
+
+        List<Integer> years = new ArrayList<>();
+        for (int y = LocalDate.now().getYear() - 3; y <= LocalDate.now().getYear() + 1; y++) {
+            years.add(y);
+        }
 
         List<WorkRecord> allRecords = workRecordRepository.findAll();
         List<WorkRecord> records = new ArrayList<>(allRecords);
@@ -49,6 +57,11 @@ public class HomeController {
         if (shiftName == null || shiftName.isBlank()) {
             shiftName = "ALL";
         }
+
+        records = records.stream()
+                .filter(r -> r.getDate() != null)
+                .filter(r -> r.getDate().getYear() == selectedYear)
+                .toList();
 
         if (!shiftName.equals("ALL")) {
             String selectedShift = shiftName;
@@ -66,6 +79,15 @@ public class HomeController {
                     .toList();
         }
 
+        records = records.stream()
+                .sorted((a, b) -> {
+                    if (a.getDate() == null && b.getDate() == null) return 0;
+                    if (a.getDate() == null) return 1;
+                    if (b.getDate() == null) return -1;
+                    return b.getDate().compareTo(a.getDate());
+                })
+                .toList();
+
         double totalBonus = records.stream()
                 .mapToDouble(WorkRecord::getBonus)
                 .sum();
@@ -73,7 +95,7 @@ public class HomeController {
         Map<String, Double> monthlySummary = new LinkedHashMap<>();
 
         for (int i = 1; i <= 12; i++) {
-            YearMonth ym = YearMonth.of(LocalDate.now().getYear(), i);
+            YearMonth ym = YearMonth.of(selectedYear, i);
 
             double monthTotal = allRecords.stream()
                     .filter(r -> r.getDate() != null)
@@ -94,6 +116,8 @@ public class HomeController {
 
         for (String shift : shifts) {
             double shiftTotal = allRecords.stream()
+                    .filter(r -> r.getDate() != null)
+                    .filter(r -> r.getDate().getYear() == selectedYear)
                     .filter(r -> r.getShiftName() != null)
                     .filter(r -> r.getShiftName().equals(shift))
                     .filter(r -> {
@@ -101,8 +125,7 @@ public class HomeController {
                             return true;
                         }
 
-                        return r.getDate() != null
-                                && YearMonth.from(r.getDate()).equals(YearMonth.parse(month));
+                        return YearMonth.from(r.getDate()).equals(YearMonth.parse(month));
                     })
                     .mapToDouble(WorkRecord::getBonus)
                     .sum();
@@ -112,8 +135,8 @@ public class HomeController {
 
         Employee selectedSummaryEmployee = null;
         List<WorkRecord> employeeRecords = new ArrayList<>();
-        double employeeTotalBonus = 0.0;
 
+        double employeeTotalBonus = 0.0;
         int employeeShiftCount = 0;
 
         double avgRoboti = 0.0;
@@ -127,26 +150,24 @@ public class HomeController {
         double avgOtraPakape = 0.0;
         double avgTreshaPakape = 0.0;
         double avgCeturtaPakape = 0.0;
-        double avgNepilnieKopa = 0.0;
 
         double totalNepilnieKopa = 0.0;
 
         if (summaryEmployeeId != null) {
             selectedSummaryEmployee = employeeRepository.findById(summaryEmployeeId).orElse(null);
 
-            String selectedMonth = summaryMonth;
-
             employeeRecords = allRecords.stream()
                     .filter(r -> r.getEmployee() != null)
                     .filter(r -> r.getEmployee().getId().equals(summaryEmployeeId))
+                    .filter(r -> r.getDate() != null)
                     .filter(r -> {
-                        if (selectedMonth == null || selectedMonth.isBlank()) {
-                            return true;
+                        if (summaryMonth == null || summaryMonth.isBlank()) {
+                            return r.getDate().getYear() == selectedYear;
                         }
 
-                        return r.getDate() != null
-                                && YearMonth.from(r.getDate()).equals(YearMonth.parse(selectedMonth));
+                        return YearMonth.from(r.getDate()).equals(YearMonth.parse(summaryMonth));
                     })
+                    .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
                     .toList();
 
             employeeTotalBonus = employeeRecords.stream()
@@ -175,25 +196,34 @@ public class HomeController {
                     + totalTreshaPakape
                     + totalCeturtaPakape;
 
-            if (employeeShiftCount > 0) {
-                avgRoboti = totalRoboti / employeeShiftCount;
-                avgCirsana = totalCirsana / employeeShiftCount;
-                avgCirsanaPilnie = totalCirsanaPilnie / employeeShiftCount;
-                avgCirsanaNepilnie = totalCirsanaNepilnie / employeeShiftCount;
+            long robotiCount = employeeRecords.stream().filter(r -> r.getRoboti() > 0).count();
+            long cirsanaCount = employeeRecords.stream().filter(r -> r.getCirsana() > 0).count();
+            long cirsanaPilnieCount = employeeRecords.stream().filter(r -> r.getCirsanaPilnie() > 0).count();
+            long cirsanaNepilnieCount = employeeRecords.stream().filter(r -> r.getCirsanaNepilnie() > 0).count();
 
-                avgPilnie = totalPilnie / employeeShiftCount;
-                avgNepilnie = totalNepilnie / employeeShiftCount;
+            long pilnieCount = employeeRecords.stream().filter(r -> r.getPilnie() > 0).count();
+            long nepilnieCount = employeeRecords.stream().filter(r -> r.getNepilnie() > 0).count();
 
-                avgPirmaPakape = totalPirmaPakape / employeeShiftCount;
-                avgOtraPakape = totalOtraPakape / employeeShiftCount;
-                avgTreshaPakape = totalTreshaPakape / employeeShiftCount;
-                avgCeturtaPakape = totalCeturtaPakape / employeeShiftCount;
+            long pirmaPakapeCount = employeeRecords.stream().filter(r -> r.getPirmaPakape() > 0).count();
+            long otraPakapeCount = employeeRecords.stream().filter(r -> r.getOtraPakape() > 0).count();
+            long treshaPakapeCount = employeeRecords.stream().filter(r -> r.getTreshaPakape() > 0).count();
+            long ceturtaPakapeCount = employeeRecords.stream().filter(r -> r.getCeturtaPakape() > 0).count();
 
-                avgNepilnieKopa = totalNepilnieKopa / employeeShiftCount;
-            }
+            avgRoboti = robotiCount == 0 ? 0 : totalRoboti / robotiCount;
+            avgCirsana = cirsanaCount == 0 ? 0 : totalCirsana / cirsanaCount;
+            avgCirsanaPilnie = cirsanaPilnieCount == 0 ? 0 : totalCirsanaPilnie / cirsanaPilnieCount;
+            avgCirsanaNepilnie = cirsanaNepilnieCount == 0 ? 0 : totalCirsanaNepilnie / cirsanaNepilnieCount;
+
+            avgPilnie = pilnieCount == 0 ? 0 : totalPilnie / pilnieCount;
+            avgNepilnie = nepilnieCount == 0 ? 0 : totalNepilnie / nepilnieCount;
+
+            avgPirmaPakape = pirmaPakapeCount == 0 ? 0 : totalPirmaPakape / pirmaPakapeCount;
+            avgOtraPakape = otraPakapeCount == 0 ? 0 : totalOtraPakape / otraPakapeCount;
+            avgTreshaPakape = treshaPakapeCount == 0 ? 0 : totalTreshaPakape / treshaPakapeCount;
+            avgCeturtaPakape = ceturtaPakapeCount == 0 ? 0 : totalCeturtaPakape / ceturtaPakapeCount;
         }
 
-        model.addAttribute("employees", employeeRepository.findAll());
+        model.addAttribute("employees", employeeRepository.findByActiveTrueOrderByNameAsc());
         model.addAttribute("assortments", assortmentRepository.findByActiveTrue());
         model.addAttribute("records", records);
 
@@ -206,6 +236,8 @@ public class HomeController {
 
         model.addAttribute("selectedShift", shiftName);
         model.addAttribute("selectedMonth", month);
+        model.addAttribute("selectedYear", selectedYear);
+        model.addAttribute("years", years);
 
         model.addAttribute("summaryEmployeeId", summaryEmployeeId);
         model.addAttribute("selectedSummaryMonth", summaryMonth);
@@ -225,7 +257,6 @@ public class HomeController {
         model.addAttribute("avgOtraPakape", avgOtraPakape);
         model.addAttribute("avgTreshaPakape", avgTreshaPakape);
         model.addAttribute("avgCeturtaPakape", avgCeturtaPakape);
-        model.addAttribute("avgNepilnieKopa", avgNepilnieKopa);
         model.addAttribute("totalNepilnieKopa", totalNepilnieKopa);
 
         return "index";
@@ -235,16 +266,8 @@ public class HomeController {
     public String addRecord(@RequestParam Long employeeId,
                             @RequestParam String shiftName,
                             @RequestParam(required = false) String date,
-                            @RequestParam(required = false) String roboti,
-                            @RequestParam(required = false) String cirsana,
-                            @RequestParam(required = false) String cirsanaPilnie,
-                            @RequestParam(required = false) String cirsanaNepilnie,
-                            @RequestParam(required = false) String pilnie,
-                            @RequestParam(required = false) String nepilnie,
-                            @RequestParam(required = false) String pirmaPakape,
-                            @RequestParam(required = false) String otraPakape,
-                            @RequestParam(required = false) String treshaPakape,
-                            @RequestParam(required = false) String ceturtaPakape) {
+                            @RequestParam(required = false) List<String> workType,
+                            @RequestParam(required = false) List<String> amount) {
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
 
@@ -255,21 +278,36 @@ public class HomeController {
         record.setShiftName(shiftName);
         record.setDate(parseDate(date));
 
-        record.setRoboti(parseDouble(roboti));
-        record.setCirsana(parseDouble(cirsana));
-        record.setCirsanaPilnie(parseDouble(cirsanaPilnie));
-        record.setCirsanaNepilnie(parseDouble(cirsanaNepilnie));
+        if (workType != null && amount != null) {
+            for (int i = 0; i < workType.size(); i++) {
 
-        record.setPilnie(parseDouble(pilnie));
-        record.setNepilnie(parseDouble(nepilnie));
+                String type = workType.get(i);
+                double value = 0.0;
 
-        record.setPirmaPakape(parseDouble(pirmaPakape));
-        record.setOtraPakape(parseDouble(otraPakape));
-        record.setTreshaPakape(parseDouble(treshaPakape));
-        record.setCeturtaPakape(parseDouble(ceturtaPakape));
+                if (i < amount.size()) {
+                    value = parseDouble(amount.get(i));
+                }
+
+                if (type == null || type.isBlank() || value == 0.0) {
+                    continue;
+                }
+
+                switch (type) {
+                    case "ROBOTS" -> record.setRoboti(record.getRoboti() + value);
+                    case "CIRSANA" -> record.setCirsana(record.getCirsana() + value);
+                    case "CIRSANA_PILNIE" -> record.setCirsanaPilnie(record.getCirsanaPilnie() + value);
+                    case "CIRSANA_NEPILNIE" -> record.setCirsanaNepilnie(record.getCirsanaNepilnie() + value);
+                    case "PILNIE" -> record.setPilnie(record.getPilnie() + value);
+                    case "NEPILNIE" -> record.setNepilnie(record.getNepilnie() + value);
+                    case "PAKAPE_I" -> record.setPirmaPakape(record.getPirmaPakape() + value);
+                    case "PAKAPE_II" -> record.setOtraPakape(record.getOtraPakape() + value);
+                    case "PAKAPE_III" -> record.setTreshaPakape(record.getTreshaPakape() + value);
+                    case "PAKAPE_IV" -> record.setCeturtaPakape(record.getCeturtaPakape() + value);
+                }
+            }
+        }
 
         bonusCalculatorService.calculateBonus(record);
-
         workRecordRepository.save(record);
 
         return "redirect:/";
@@ -280,7 +318,7 @@ public class HomeController {
         WorkRecord record = workRecordRepository.findById(id).orElseThrow();
 
         model.addAttribute("record", record);
-        model.addAttribute("employees", employeeRepository.findAll());
+        model.addAttribute("employees", employeeRepository.findByActiveTrueOrderByNameAsc());
         model.addAttribute("assortments", assortmentRepository.findByActiveTrue());
 
         return "edit-record";
@@ -324,7 +362,6 @@ public class HomeController {
         record.setCeturtaPakape(parseDouble(ceturtaPakape));
 
         bonusCalculatorService.calculateBonus(record);
-
         workRecordRepository.save(record);
 
         return "redirect:/";
@@ -333,6 +370,19 @@ public class HomeController {
     @GetMapping("/delete-record/{id}")
     public String deleteRecord(@PathVariable Long id) {
         workRecordRepository.deleteById(id);
+        return "redirect:/";
+    }
+    
+    @PostMapping("/recalculate-bonuses")
+    public String recalculateBonuses() {
+
+        List<WorkRecord> records = workRecordRepository.findAll();
+
+        for (WorkRecord record : records) {
+            bonusCalculatorService.calculateBonus(record);
+            workRecordRepository.save(record);
+        }
+
         return "redirect:/";
     }
 
