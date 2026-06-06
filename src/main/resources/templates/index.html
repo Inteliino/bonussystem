@@ -721,7 +721,7 @@
         const rows = document.querySelectorAll(".shift-bonus-row");
 
         let total = 0;
-        const grouped = {};
+        let grouped = {};
 
         rows.forEach(row => {
             const rowDate = row.getAttribute("data-date") || "";
@@ -729,6 +729,7 @@
             const rowShift = row.getAttribute("data-shift") || "";
             const rowEmployee = row.getAttribute("data-employee") || "";
             const rowBonus = parseBonus(row.getAttribute("data-bonus"));
+            const employeeName = row.children[2].innerText;
 
             const monthOk = !month || rowMonth === month;
             const shiftOk = !shift || rowShift === shift;
@@ -737,12 +738,14 @@
             row.style.display = "none";
 
             if (monthOk && shiftOk && employeeOk) {
-                const key = rowDate + "|" + rowShift + "|" + rowEmployee;
+                const key = rowEmployee || employeeName;
 
                 if (!grouped[key]) {
                     grouped[key] = {
                         row: row,
-                        bonus: 0
+                        bonus: 0,
+                        name: employeeName,
+                        shift: rowShift
                     };
                 }
 
@@ -753,6 +756,9 @@
 
         Object.values(grouped).forEach(item => {
             item.row.style.display = "";
+            item.row.children[0].innerText = "Kopā";
+            item.row.children[1].innerText = item.shift;
+            item.row.children[2].innerText = item.name;
             item.row.children[3].innerText = formatEuro(item.bonus);
         });
 
