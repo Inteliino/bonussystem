@@ -13,9 +13,9 @@
     <div class="wow-dashboard-header">
 
         <div class="wow-brand">
-		<div class="wow-logo">
-    		🏭
-		</div>
+            <div class="wow-logo">
+                🏭
+            </div>
             <div>
                 <h1>Maiņu attinēju prēmijas</h1>
                 <p>Maiņu prēmiju uzskaite</p>
@@ -221,7 +221,7 @@
         <div class="section-header">
             <div>
                 <h2>Maiņu salīdzinājums</h2>
-                <p>Maiņu izmaksu pārskats</p>
+                <p>Maiņu izmaksu un vidējo rādītāju pārskats</p>
             </div>
         </div>
 
@@ -239,6 +239,77 @@
                     <div class="chart-bar" th:style="'width:' + ${entry.value * 3} + 'px'"></div>
                 </div>
                 <div class="chart-value nowrap" th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'">0.00 €</div>
+            </div>
+        </div>
+
+        <h3 class="stats-title">Vidējie rādītāji pa maiņām</h3>
+
+        <div class="shift-wow-grid">
+            <div class="shift-wow-card" th:each="stat : ${shiftStats.values()}">
+
+                <div class="shift-wow-top">
+                    <div>
+                        <h3 th:text="${stat.shiftName}">1. maiņa</h3>
+                        <p th:text="'Maiņu skaits: ' + ${stat.shiftCount}">Maiņu skaits: 0</p>
+                    </div>
+
+                    <div class="shift-wow-money"
+                         th:text="${#numbers.formatDecimal(stat.totalBonus,1,2)} + ' €'">
+                        0.00 €
+                    </div>
+                </div>
+
+                <div class="shift-mini-stats">
+                    <div>
+                        <span>Roboti</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgRoboti,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Pilnie</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgPilnie,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Nepilnie</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgNepilnie,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Pakāpe I</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgPirmaPakape,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Pakāpe II</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgOtraPakape,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Pakāpe III</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgTreshaPakape,1,0)}">0</b>
+                    </div>
+
+                    <div>
+                        <span>Pakāpe IV</span>
+                        <b th:text="${#numbers.formatDecimal(stat.avgCeturtaPakape,1,0)}">0</b>
+                    </div>
+                </div>
+
+                <div class="shift-leaders">
+                    <h4>🏆 Top 2 prēmiju līderi</h4>
+
+                    <div class="leader-row" th:each="leader, iter : ${stat.topLeaders}">
+                        <span th:text="${iter.index == 0 ? '🥇' : '🥈'}">🥇</span>
+                        <strong th:text="${leader.name}">Darbinieks</strong>
+                        <b th:text="${#numbers.formatDecimal(leader.bonus,1,2)} + ' €'">0.00 €</b>
+                    </div>
+
+                    <div class="leader-empty" th:if="${stat.topLeaders.size() == 0}">
+                        Nav datu
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

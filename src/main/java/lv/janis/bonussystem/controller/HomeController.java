@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 public class HomeController {
@@ -133,6 +135,53 @@ public class HomeController {
             shiftSummary.put(shift, shiftTotal);
         }
 
+        Map<String, ShiftStats> shiftStats = new LinkedHashMap<>();
+
+        for (String shift : shifts) {
+            shiftStats.put(shift, new ShiftStats(shift));
+        }
+
+        List<WorkRecord> shiftCompareRecords = allRecords.stream()
+                .filter(r -> r.getDate() != null)
+                .filter(r -> r.getDate().getYear() == selectedYear)
+                .filter(r -> r.getShiftName() != null)
+                .filter(r -> {
+                    if (month == null || month.isBlank()) {
+                        return true;
+                    }
+
+                    return YearMonth.from(r.getDate()).equals(YearMonth.parse(month));
+                })
+                .toList();
+
+        for (WorkRecord record : shiftCompareRecords) {
+            ShiftStats stat = shiftStats.get(record.getShiftName());
+
+            if (stat != null) {
+                stat.addRecord(record);
+            }
+        }
+
+        for (ShiftStats stat : shiftStats.values()) {
+            stat.calculate();
+
+            stat.setTopLeaders(
+                    shiftCompareRecords.stream()
+                            .filter(r -> stat.getShiftName().equals(r.getShiftName()))
+                            .filter(r -> r.getEmployee() != null)
+                            .collect(Collectors.groupingBy(
+                                    r -> r.getEmployee().getName(),
+                                    Collectors.summingDouble(WorkRecord::getBonus)
+                            ))
+                            .entrySet()
+                            .stream()
+                            .sorted(Map.Entry.<String, Double>comparingByValue(Comparator.reverseOrder()))
+                            .limit(2)
+                            .map(e -> new ShiftLeader(e.getKey(), e.getValue()))
+                            .toList()
+            );
+        }
+
         Employee selectedSummaryEmployee = null;
         List<WorkRecord> employeeRecords = new ArrayList<>();
 
@@ -233,6 +282,7 @@ public class HomeController {
         model.addAttribute("yearlyTotal", yearlyTotal);
 
         model.addAttribute("shiftSummary", shiftSummary);
+        model.addAttribute("shiftStats", shiftStats);
 
         model.addAttribute("selectedShift", shiftName);
         model.addAttribute("selectedMonth", month);
@@ -372,7 +422,7 @@ public class HomeController {
         workRecordRepository.deleteById(id);
         return "redirect:/";
     }
-    
+
     @PostMapping("/recalculate-bonuses")
     public String recalculateBonuses() {
 
@@ -400,5 +450,158 @@ public class HomeController {
         }
 
         return Double.parseDouble(value.replace(",", "."));
+    }
+
+    public static class ShiftLeader {
+        private String name;
+        private double bonus;
+
+        public ShiftLeader(String name, double bonus) {
+            this.name = name;
+            this.bonus = bonus;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public double getBonus() {
+            return bonus;
+        }
+    }
+
+    public static class ShiftStats {
+
+        private String shiftName;
+        private int shiftCount;
+
+        private double totalBonus;
+        private double avgRoboti;
+        private double avgPilnie;
+        private double avgNepilnie;
+        private double avgPirmaPakape;
+        private double avgOtraPakape;
+        private double avgTreshaPakape;
+        private double avgCeturtaPakape;
+
+        private double totalRoboti;
+        private double totalPilnie;
+        private double totalNepilnie;
+        private double totalPirmaPakape;
+        private double totalOtraPakape;
+        private double totalTreshaPakape;
+        private double totalCeturtaPakape;
+
+        private int robotiCount;
+        private int pilnieCount;
+        private int nepilnieCount;
+        private int pirmaCount;
+        private int otraCount;
+        private int treshaCount;
+        private int ceturtaCount;
+
+        private List<ShiftLeader> topLeaders = new ArrayList<>();
+
+        public ShiftStats(String shiftName) {
+            this.shiftName = shiftName;
+        }
+
+        public void addRecord(WorkRecord record) {
+            shiftCount++;
+            totalBonus += record.getBonus();
+
+            if (record.getRoboti() > 0) {
+                totalRoboti += record.getRoboti();
+                robotiCount++;
+            }
+
+            if (record.getPilnie() > 0) {
+                totalPilnie += record.getPilnie();
+                pilnieCount++;
+            }
+
+            if (record.getNepilnie() > 0) {
+                totalNepilnie += record.getNepilnie();
+                nepilnieCount++;
+            }
+
+            if (record.getPirmaPakape() > 0) {
+                totalPirmaPakape += record.getPirmaPakape();
+                pirmaCount++;
+            }
+
+            if (record.getOtraPakape() > 0) {
+                totalOtraPakape += record.getOtraPakape();
+                otraCount++;
+            }
+
+            if (record.getTreshaPakape() > 0) {
+                totalTreshaPakape += record.getTreshaPakape();
+                treshaCount++;
+            }
+
+            if (record.getCeturtaPakape() > 0) {
+                totalCeturtaPakape += record.getCeturtaPakape();
+                ceturtaCount++;
+            }
+        }
+
+        public void calculate() {
+            avgRoboti = robotiCount == 0 ? 0 : totalRoboti / robotiCount;
+            avgPilnie = pilnieCount == 0 ? 0 : totalPilnie / pilnieCount;
+            avgNepilnie = nepilnieCount == 0 ? 0 : totalNepilnie / nepilnieCount;
+            avgPirmaPakape = pirmaCount == 0 ? 0 : totalPirmaPakape / pirmaCount;
+            avgOtraPakape = otraCount == 0 ? 0 : totalOtraPakape / otraCount;
+            avgTreshaPakape = treshaCount == 0 ? 0 : totalTreshaPakape / treshaCount;
+            avgCeturtaPakape = ceturtaCount == 0 ? 0 : totalCeturtaPakape / ceturtaCount;
+        }
+
+        public String getShiftName() {
+            return shiftName;
+        }
+
+        public int getShiftCount() {
+            return shiftCount;
+        }
+
+        public double getTotalBonus() {
+            return totalBonus;
+        }
+
+        public double getAvgRoboti() {
+            return avgRoboti;
+        }
+
+        public double getAvgPilnie() {
+            return avgPilnie;
+        }
+
+        public double getAvgNepilnie() {
+            return avgNepilnie;
+        }
+
+        public double getAvgPirmaPakape() {
+            return avgPirmaPakape;
+        }
+
+        public double getAvgOtraPakape() {
+            return avgOtraPakape;
+        }
+
+        public double getAvgTreshaPakape() {
+            return avgTreshaPakape;
+        }
+
+        public double getAvgCeturtaPakape() {
+            return avgCeturtaPakape;
+        }
+
+        public List<ShiftLeader> getTopLeaders() {
+            return topLeaders;
+        }
+
+        public void setTopLeaders(List<ShiftLeader> topLeaders) {
+            this.topLeaders = topLeaders;
+        }
     }
 }
