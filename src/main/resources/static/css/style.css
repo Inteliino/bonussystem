@@ -1651,3 +1651,243 @@ tbody tr:hover {
         grid-template-columns: 1fr;
     }
 }
+.users-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    padding: 30px;
+    border-radius: 30px;
+    background:
+        radial-gradient(circle at 12% 15%, rgba(37,99,235,.30), transparent 35%),
+        radial-gradient(circle at 85% 10%, rgba(147,51,234,.32), transparent 38%),
+        linear-gradient(135deg, rgba(15,23,42,.90), rgba(30,20,60,.82));
+    border: 1px solid rgba(96,165,250,.22);
+    box-shadow: 0 24px 70px rgba(0,0,0,.36);
+}
+
+.users-icon {
+    width: 74px;
+    height: 74px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg,#1685ff,#7c3aed);
+    font-size: 34px;
+    box-shadow: 0 0 35px rgba(124,58,237,.42);
+    margin-bottom: 16px;
+}
+
+.users-hero h1 {
+    margin: 0;
+    font-size: 42px;
+    font-weight: 900;
+}
+
+.users-hero p {
+    margin: 10px 0 0;
+    color: #bfdbfe;
+    font-size: 18px;
+}
+
+.users-hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.user-wow-add,
+.user-wow-list {
+    margin-top: 22px;
+    padding: 26px;
+    border-radius: 28px;
+    background: linear-gradient(180deg, rgba(22,30,52,.86), rgba(15,20,40,.82));
+    border: 1px solid rgba(96,165,250,.20);
+    box-shadow: 0 22px 65px rgba(0,0,0,.32);
+    backdrop-filter: blur(22px);
+}
+
+.user-wow-add h2,
+.user-wow-list h2 {
+    margin: 0;
+    font-size: 28px;
+}
+
+.user-wow-add p,
+.user-wow-list p {
+    color: #aebfdd;
+    margin: 8px 0 0;
+}
+
+.user-wow-form {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr auto;
+    gap: 14px;
+}
+
+.user-list-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 22px;
+}
+
+.user-count-card {
+    min-width: 170px;
+    padding: 18px 24px;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at 20% 10%, rgba(34,197,94,.28), transparent 45%),
+        rgba(34,197,94,.10);
+    border: 1px solid rgba(74,222,128,.28);
+    text-align: center;
+}
+
+.user-count-card span {
+    color: #a7f3d0;
+    font-weight: 900;
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.user-count-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 42px;
+    color: #4ade80;
+    font-weight: 900;
+}
+
+.user-count-card p {
+    margin: 0;
+    color: #d1fae5;
+    font-weight: 800;
+}
+
+.user-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.user-row-card {
+    display: grid;
+    grid-template-columns: 78px 1.2fr 1.1fr .75fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,.075), rgba(255,255,255,.035));
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
+    transition: .22s ease;
+}
+
+.user-row-card:hover {
+    transform: translateY(-3px);
+    background:
+        radial-gradient(circle at 10% 10%, rgba(37,99,235,.20), transparent 34%),
+        linear-gradient(135deg, rgba(255,255,255,.10), rgba(255,255,255,.045));
+    border-color: rgba(96,165,250,.35);
+}
+
+.user-id-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    background: rgba(79,70,229,.25);
+    border: 1px solid rgba(255,255,255,.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-id-badge span,
+.user-person label,
+.user-password label,
+.user-role label {
+    display: block;
+    margin-bottom: 7px;
+    color: #b8c6d8;
+    font-size: 12px;
+    font-weight: 900;
+    text-transform: uppercase;
+}
+
+.user-id-badge strong {
+    color: #fff;
+    font-size: 24px;
+    font-weight: 900;
+}
+
+.user-person {
+    display: grid;
+    grid-template-columns: 54px 1fr;
+    align-items: center;
+    gap: 14px;
+}
+
+.user-avatar {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(79,70,229,.28);
+    font-size: 26px;
+}
+
+.user-wow-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 9px;
+    flex-wrap: wrap;
+}
+
+.user-row-card input,
+.user-row-card select {
+    background: rgba(255,255,255,.075);
+    font-size: 15px;
+}
+
+@media (max-width: 1250px) {
+    .user-row-card {
+        grid-template-columns: 80px 1fr 1fr;
+    }
+
+    .user-role,
+    .user-wow-actions {
+        grid-column: span 1;
+    }
+}
+
+@media (max-width: 850px) {
+    .users-hero,
+    .user-list-top {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .user-wow-form,
+    .user-row-card {
+        grid-template-columns: 1fr;
+    }
+
+    .user-count-card {
+        width: 100%;
+    }
+
+    .user-person {
+        grid-template-columns: 1fr;
+    }
+
+    .user-wow-actions {
+        justify-content: flex-start;
+    }
+}

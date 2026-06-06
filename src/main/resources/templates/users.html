@@ -10,23 +10,27 @@
 
 <div class="container">
 
-    <div class="topbar">
-        <div class="logo-area">
+    <div class="users-hero">
+        <div>
+            <div class="users-icon">🛡️</div>
             <h1>Lietotāji</h1>
-            <p>Admin var pievienot, labot un dzēst piekļuves</p>
+            <p>Admin pārvalda sistēmas piekļuves un lomas</p>
         </div>
 
-        <div class="menu-buttons">
+        <div class="users-hero-actions">
             <a href="/" class="btn ghost">Dashboard</a>
             <a href="/employees" class="btn ghost">Darbinieki</a>
             <a href="/logout" class="btn ghost danger">Iziet</a>
         </div>
     </div>
 
-    <div class="section-card">
-        <h2>Pievienot lietotāju</h2>
+    <div class="user-wow-add">
+        <div>
+            <h2>➕ Pievienot lietotāju</h2>
+            <p>Izveido jaunu piekļuvi sistēmai</p>
+        </div>
 
-        <form method="post" action="/users/add" class="user-add-form">
+        <form method="post" action="/users/add" class="user-wow-form">
             <input type="text" name="username" placeholder="Lietotājvārds" required>
             <input type="text" name="password" placeholder="Parole" required>
 
@@ -39,75 +43,79 @@
         </form>
     </div>
 
-    <div class="section-card">
+    <div class="user-wow-list">
 
-        <div class="section-header">
+        <div class="user-list-top">
             <div>
                 <h2>Esošie lietotāji</h2>
                 <p>Šeit vari mainīt lietotājvārdu, paroli un lomu</p>
             </div>
 
-            <div class="summary-total">
-                Lietotāji: <span th:text="${#lists.size(users)}"></span>
+            <div class="user-count-card">
+                <span>Kopā</span>
+                <strong th:text="${#lists.size(users)}">0</strong>
+                <p>lietotāji</p>
             </div>
         </div>
 
-        <div class="employee-table-wrapper">
+        <div class="user-cards">
 
-            <table class="employee-table">
-                <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Lietotājvārds</th>
-                    <th>Parole</th>
-                    <th>Loma</th>
-                    <th>Darbības</th>
-                </tr>
-                </thead>
+            <div class="user-row-card" th:each="user : ${users}">
 
-                <tbody>
-                <tr th:each="user : ${users}">
+                <form th:action="@{/users/edit/{id}(id=${user.id})}"
+                      method="post"
+                      th:id="'userForm' + ${user.id}">
+                </form>
 
-                    <td th:text="${user.id}"></td>
+                <div class="user-id-badge">
+                    <span>ID</span>
+                    <strong th:text="${user.id}">1</strong>
+                </div>
 
-                    <td>
-                        <form th:action="@{/users/edit/{id}(id=${user.id})}" method="post" th:id="'userForm' + ${user.id}">
-                            <input type="text" name="username" th:value="${user.username}" required>
-                        </form>
-                    </td>
-
-                    <td>
+                <div class="user-person">
+                    <div class="user-avatar">👤</div>
+                    <div>
+                        <label>Lietotājvārds</label>
                         <input type="text"
-                               name="password"
-                               th:value="${user.password}"
+                               name="username"
+                               th:value="${user.username}"
                                th:form="'userForm' + ${user.id}"
                                required>
-                    </td>
+                    </div>
+                </div>
 
-                    <td>
-                        <select name="role" th:form="'userForm' + ${user.id}">
-                            <option value="USER" th:selected="${user.role == 'USER'}">USER</option>
-                            <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
-                        </select>
-                    </td>
+                <div class="user-password">
+                    <label>Parole</label>
+                    <input type="text"
+                           name="password"
+                           th:value="${user.password}"
+                           th:form="'userForm' + ${user.id}"
+                           required>
+                </div>
 
-                    <td class="employee-actions">
-                        <button type="submit"
-                                class="small-btn blue"
-                                th:form="'userForm' + ${user.id}">
-                            Saglabāt
-                        </button>
+                <div class="user-role">
+                    <label>Loma</label>
+                    <select name="role" th:form="'userForm' + ${user.id}">
+                        <option value="USER" th:selected="${user.role == 'USER'}">USER</option>
+                        <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
+                    </select>
+                </div>
 
-                        <a th:href="@{/users/delete/{id}(id=${user.id})}"
-                           class="small-btn red"
-                           onclick="return confirm('Tiešām dzēst šo lietotāju?')">
-                            Dzēst
-                        </a>
-                    </td>
+                <div class="user-wow-actions">
+                    <button type="submit"
+                            class="small-btn blue"
+                            th:form="'userForm' + ${user.id}">
+                        Saglabāt
+                    </button>
 
-                </tr>
-                </tbody>
-            </table>
+                    <a th:href="@{/users/delete/{id}(id=${user.id})}"
+                       class="small-btn red"
+                       onclick="return confirm('Tiešām dzēst šo lietotāju?')">
+                        Dzēst
+                    </a>
+                </div>
+
+            </div>
 
         </div>
     </div>
