@@ -31,27 +31,27 @@
 
     <div class="wow-menu-card">
 
-        <a class="wow-menu-item active" href="javascript:void(0)" onclick="showSection('mainMenu')">
+        <a class="wow-menu-item active" href="#mainMenu" onclick="event.preventDefault(); showSection('mainMenu');">
             <span>🏠</span>
             <strong>Main Menu</strong>
         </a>
 
-        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('monthlySummary')">
+        <a class="wow-menu-item" href="#monthlySummary" onclick="event.preventDefault(); showSection('monthlySummary');">
             <span>📅</span>
             <strong>Kopsavilkums pa mēnešiem</strong>
         </a>
 
-        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('shiftComparison')">
+        <a class="wow-menu-item" href="#shiftComparison" onclick="event.preventDefault(); showSection('shiftComparison');">
             <span>📈</span>
             <strong>Maiņu salīdzinājums</strong>
         </a>
 
-        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('shiftBonus')">
+        <a class="wow-menu-item" href="#shiftBonus" onclick="event.preventDefault(); showSection('shiftBonus');">
             <span>🎁</span>
             <strong>Prēmijas pa maiņām</strong>
         </a>
 
-        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('employeeReport')">
+        <a class="wow-menu-item" href="#employeeReport" onclick="event.preventDefault(); showSection('employeeReport');">
             <span>👤</span>
             <strong>Darbinieka atskaite</strong>
         </a>
@@ -84,8 +84,12 @@
 
             <form id="addRecordForm" class="form-grid" th:action="@{/add-record}" method="post">
 
-                <input type="text" id="employeeSearchInput" list="employeeList"
-                       placeholder="Raksti vai izvēlies darbinieku" autocomplete="off" required>
+                <input type="text"
+                       id="employeeSearchInput"
+                       list="employeeList"
+                       placeholder="Raksti vai izvēlies darbinieku"
+                       autocomplete="off"
+                       required>
 
                 <input type="hidden" name="employeeId" id="employeeIdInput">
 
@@ -153,7 +157,9 @@
                 <button type="submit" class="btn primary">Rādīt</button>
             </form>
 
-            <input type="text" id="recordSearch" class="employee-search"
+            <input type="text"
+                   id="recordSearch"
+                   class="employee-search"
                    placeholder="Meklēt pēc darbinieka, datuma, maiņas vai tabeles nr...">
 
             <div class="table-scroll">
@@ -212,7 +218,6 @@
                 <th>Kopējā summa</th>
             </tr>
             </thead>
-
             <tbody>
             <tr th:each="entry : ${monthlySummary}"
                 class="clickable-month-row"
@@ -540,9 +545,14 @@
 
 <script>
     function hideAllSections() {
-        ["mainMenu", "monthlySummary", "shiftComparison", "shiftBonus", "employeeReport"].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.style.display = "none";
+        const sections = ["mainMenu", "monthlySummary", "shiftComparison", "shiftBonus", "employeeReport"];
+
+        sections.forEach(function (id) {
+            const section = document.getElementById(id);
+
+            if (section) {
+                section.style.display = "none";
+            }
         });
     }
 
@@ -553,17 +563,19 @@
             item.classList.remove("active");
         });
 
-        document.querySelectorAll(".wow-menu-item").forEach(function (item) {
-            const click = item.getAttribute("onclick") || "";
-            if (click.includes(id)) {
-                item.classList.add("active");
-            }
-        });
+        const activeItem = document.querySelector('.wow-menu-item[href="#' + id + '"]');
+
+        if (activeItem) {
+            activeItem.classList.add("active");
+        }
 
         const section = document.getElementById(id);
-        if (section) section.style.display = "block";
 
-        window.location.hash = id;
+        if (section) {
+            section.style.display = "block";
+        }
+
+        history.replaceState(null, null, "#" + id);
 
         if (id === "shiftBonus") {
             filterShiftBonus();
@@ -577,6 +589,7 @@
     if (employeeSearchInput) {
         employeeSearchInput.addEventListener("input", function () {
             const value = this.value.trim();
+
             employeeIdInput.value = "";
             tabelesNrInput.value = "";
 
@@ -604,11 +617,15 @@
 
             amountInputs.forEach(function (input) {
                 const value = Number(String(input.value).replace(",", "."));
-                if (value > 100) hasLargeValue = true;
+
+                if (value > 100) {
+                    hasLargeValue = true;
+                }
             });
 
             if (hasLargeValue) {
                 const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
+
                 if (!confirmed) {
                     e.preventDefault();
                     return;
@@ -616,6 +633,7 @@
             }
 
             const submitButton = addRecordForm.querySelector("button[type='submit']");
+
             if (submitButton) {
                 submitButton.disabled = true;
                 submitButton.innerText = "Saglabā...";
@@ -644,7 +662,10 @@
     }
 
     function parseBonus(value) {
-        if (!value) return 0;
+        if (!value) {
+            return 0;
+        }
+
         return Number(String(value).replace(",", ".")) || 0;
     }
 
@@ -653,7 +674,9 @@
         const shiftInput = document.getElementById("shiftBonusShift");
         const employeeInput = document.getElementById("shiftBonusEmployee");
 
-        if (!monthInput || !shiftInput || !employeeInput) return;
+        if (!monthInput || !shiftInput || !employeeInput) {
+            return;
+        }
 
         const month = monthInput.value;
         const shift = shiftInput.value;
@@ -681,7 +704,10 @@
         });
 
         const totalEl = document.getElementById("shiftBonusTotal");
-        if (totalEl) totalEl.innerText = formatEuro(total);
+
+        if (totalEl) {
+            totalEl.innerText = formatEuro(total);
+        }
     }
 
     window.addEventListener("load", function () {
@@ -704,20 +730,6 @@
             showSection("employeeReport");
         } else {
             showSection("mainMenu");
-        }
-    });
-
-    window.addEventListener("hashchange", function () {
-        const hash = window.location.hash.replace("#", "");
-
-        if (hash === "monthlySummary") {
-            showSection("monthlySummary");
-        } else if (hash === "shiftComparison") {
-            showSection("shiftComparison");
-        } else if (hash === "shiftBonus") {
-            showSection("shiftBonus");
-        } else if (hash === "employeeReport") {
-            showSection("employeeReport");
         }
     });
 </script>
