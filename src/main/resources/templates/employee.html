@@ -10,13 +10,14 @@
 
 <div class="container">
 
-    <div class="topbar">
-        <div class="logo-area">
+    <div class="employees-hero">
+        <div>
+            <div class="employees-icon">👥</div>
             <h1>Darbinieki</h1>
-            <p>Pievieno, labo un maini darbinieka statusu</p>
+            <p>Pievieno, labo un pārvaldi darbinieku statusu</p>
         </div>
 
-        <div class="menu-buttons">
+        <div class="employees-hero-actions">
             <a href="/" class="btn ghost">Dashboard</a>
             <a href="/users" class="btn ghost">Lietotāji</a>
             <a href="/logout" class="btn ghost danger">Iziet</a>
@@ -32,104 +33,96 @@
     <div class="alert error" th:if="${error == 'hasRecords'}">Darbinieku nevar dzēst, jo viņam ir darba ieraksti. Izmanto “Neaktīvs”.</div>
     <div class="alert error" th:if="${error == 'onlyAdmin'}">Šo darbību drīkst veikt tikai admin lietotājs.</div>
 
-    <div class="section-card">
-        <h2>Pievienot darbinieku</h2>
+    <div class="employee-wow-add">
+        <div>
+            <h2>➕ Pievienot darbinieku</h2>
+            <p>Ievadi darbinieka vārdu un tabeles numuru</p>
+        </div>
 
-        <form method="post" action="/employees/add" class="employee-add-form-simple">
+        <form method="post" action="/employees/add" class="employee-wow-form">
             <input type="text" name="name" placeholder="Vārds Uzvārds" required>
             <input type="text" name="tabelesNr" placeholder="Tabeles Nr" required>
             <button type="submit" class="btn primary">Pievienot</button>
         </form>
     </div>
 
-    <div class="section-card">
+    <div class="employee-wow-list">
 
-        <div class="section-header">
+        <div class="employee-list-top">
             <div>
                 <h2>Darbinieku saraksts</h2>
                 <p>Neaktīvie paliek datubāzē, bet netiks izmantoti kā aktīvie darbinieki.</p>
             </div>
 
-            <div class="summary-total">
-                Darbinieki: <span th:text="${#lists.size(employees)}"></span>
+            <div class="employee-count-card">
+                <span>Kopā</span>
+                <strong th:text="${#lists.size(employees)}">0</strong>
+                <p>darbinieki</p>
             </div>
         </div>
 
         <input type="text"
                id="searchEmployee"
-               class="employee-search"
-               placeholder="Meklēt pēc vārda vai tabeles numura...">
+               class="employee-wow-search"
+               placeholder="🔎 Meklēt pēc vārda vai tabeles numura...">
 
-        <div class="employee-table-wrapper">
+        <div class="employee-cards">
 
-            <table class="employee-table">
-                <thead>
-                <tr>
-                    <th>Vārds Uzvārds</th>
-                    <th>Tabeles Nr</th>
-                    <th>Statuss</th>
-                    <th>Darbības</th>
-                </tr>
-                </thead>
+            <div class="employee-row-card"
+                 th:each="employee : ${employees}"
+                 th:classappend="${!employee.active} ? ' inactive-row' : ''">
 
-                <tbody>
-                <tr th:each="employee : ${employees}"
-                    th:classappend="${!employee.active} ? 'inactive-row' : ''">
+                <form th:action="@{/employees/edit/{id}(id=${employee.id})}"
+                      method="post"
+                      th:id="'editForm' + ${employee.id}">
+                </form>
 
-                    <form th:action="@{/employees/edit/{id}(id=${employee.id})}"
-                          method="post"
-                          th:id="'editForm' + ${employee.id}">
+                <div class="employee-person">
+                    <div class="employee-avatar">👤</div>
+                    <input type="text"
+                           name="name"
+                           th:value="${employee.name}"
+                           th:form="'editForm' + ${employee.id}"
+                           required>
+                </div>
+
+                <div class="employee-number">
+                    <label>Tabeles Nr</label>
+                    <input type="text"
+                           name="tabelesNr"
+                           th:value="${employee.tabelesNr}"
+                           th:form="'editForm' + ${employee.id}"
+                           required>
+                </div>
+
+                <div class="employee-status-box">
+                    <span class="status active" th:if="${employee.active}">Aktīvs</span>
+                    <span class="status inactive" th:if="${!employee.active}">Neaktīvs</span>
+                </div>
+
+                <div class="employee-wow-actions">
+                    <button type="submit"
+                            class="small-btn blue"
+                            th:form="'editForm' + ${employee.id}">
+                        Saglabāt
+                    </button>
+
+                    <form th:action="@{/employees/toggle-active/{id}(id=${employee.id})}"
+                          method="post">
+                        <button type="submit"
+                                class="small-btn orange"
+                                th:text="${employee.active} ? 'Padarīt neaktīvu' : 'Padarīt aktīvu'">
+                        </button>
                     </form>
 
-                    <td>
-                        <input type="text"
-                               name="name"
-                               th:value="${employee.name}"
-                               th:form="'editForm' + ${employee.id}"
-                               required>
-                    </td>
+                    <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
+                       class="small-btn red"
+                       onclick="return confirm('Dzēst drīkst tikai tad, ja darbiniekam nav darba ierakstu. Labāk izmanto Neaktīvs. Turpināt?')">
+                        Dzēst
+                    </a>
+                </div>
 
-                    <td>
-                        <input type="text"
-                               name="tabelesNr"
-                               th:value="${employee.tabelesNr}"
-                               th:form="'editForm' + ${employee.id}"
-                               required>
-                    </td>
-
-                    <td>
-                        <span class="status active" th:if="${employee.active}">Aktīvs</span>
-                        <span class="status inactive" th:if="${!employee.active}">Neaktīvs</span>
-                    </td>
-
-                    <td class="employee-actions">
-
-                        <button type="submit"
-                                class="small-btn blue"
-                                th:form="'editForm' + ${employee.id}">
-                            Saglabāt
-                        </button>
-
-                        <form th:action="@{/employees/toggle-active/{id}(id=${employee.id})}"
-                              method="post"
-                              style="display:inline;">
-                            <button type="submit"
-                                    class="small-btn orange"
-                                    th:text="${employee.active} ? 'Padarīt neaktīvu' : 'Padarīt aktīvu'">
-                            </button>
-                        </form>
-
-                        <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
-                           class="small-btn red"
-                           onclick="return confirm('Dzēst drīkst tikai tad, ja darbiniekam nav darba ierakstu. Labāk izmanto Neaktīvs. Turpināt?')">
-                            Dzēst
-                        </a>
-
-                    </td>
-
-                </tr>
-                </tbody>
-            </table>
+            </div>
 
         </div>
     </div>
@@ -139,15 +132,17 @@
 <script>
     const searchInput = document.getElementById("searchEmployee");
 
-    searchInput.addEventListener("keyup", function () {
-        const value = this.value.toLowerCase();
-        const rows = document.querySelectorAll(".employee-table tbody tr");
+    if (searchInput) {
+        searchInput.addEventListener("keyup", function () {
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll(".employee-row-card");
 
-        rows.forEach(function (row) {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(value) ? "" : "none";
+            rows.forEach(function (row) {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? "" : "none";
+            });
         });
-    });
+    }
 </script>
 
 </body>
