@@ -544,194 +544,195 @@
 </div>
 
 <script>
-    window.hideAllSections = function () {
-        const sections = ["mainMenu", "monthlySummary", "shiftComparison", "shiftBonus", "employeeReport"];
+window.hideAllSections = function () {
+    const sections = [
+        "mainMenu",
+        "monthlySummary",
+        "shiftComparison",
+        "shiftBonus",
+        "employeeReport"
+    ];
 
-        sections.forEach(function (id) {
-            const section = document.getElementById(id);
-
-            if (section) {
-                section.style.display = "none";
-            }
-        });
-    };
-
-    window.showSection = function (id) {
-        window.hideAllSections();
-
-        document.querySelectorAll(".wow-menu-item").forEach(function (item) {
-            item.classList.remove("active");
-        });
-
-        const activeItem = document.querySelector('.wow-menu-item[href="#' + id + '"]');
-
-        if (activeItem) {
-            activeItem.classList.add("active");
-        }
-
+    sections.forEach(function (id) {
         const section = document.getElementById(id);
-
         if (section) {
-            section.style.display = "block";
-        }
-
-        history.replaceState(null, null, "#" + id);
-
-        if (id === "shiftBonus") {
-            window.filterShiftBonus();
-        }
-    };
-
-    window.formatEuro = function (value) {
-        return value.toLocaleString("lv-LV", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }) + " €";
-    };
-
-    window.parseBonus = function (value) {
-        if (!value) {
-            return 0;
-        }
-
-        return Number(String(value).replace(",", ".")) || 0;
-    };
-
-    window.filterShiftBonus = function () {
-        const monthInput = document.getElementById("shiftBonusMonth");
-        const shiftInput = document.getElementById("shiftBonusShift");
-        const employeeInput = document.getElementById("shiftBonusEmployee");
-
-        if (!monthInput || !shiftInput || !employeeInput) {
-            return;
-        }
-
-        const month = monthInput.value;
-        const shift = shiftInput.value;
-        const employee = employeeInput.value;
-
-        let total = 0;
-
-        document.querySelectorAll(".shift-bonus-row").forEach(function (row) {
-            const rowDate = row.getAttribute("data-date") || "";
-            const rowMonth = rowDate.substring(0, 7);
-            const rowShift = row.getAttribute("data-shift") || "";
-            const rowEmployee = row.getAttribute("data-employee") || "";
-            const rowBonus = window.parseBonus(row.getAttribute("data-bonus"));
-
-            const monthOk = !month || rowMonth === month;
-            const shiftOk = !shift || rowShift === shift;
-            const employeeOk = !employee || rowEmployee === employee;
-
-            if (monthOk && shiftOk && employeeOk) {
-                row.style.display = "";
-                total += rowBonus;
-            } else {
-                row.style.display = "none";
-            }
-        });
-
-        const totalEl = document.getElementById("shiftBonusTotal");
-
-        if (totalEl) {
-            totalEl.innerText = window.formatEuro(total);
-        }
-    };
-
-    window.addEventListener("load", function () {
-        const params = new URLSearchParams(window.location.search);
-
-        if (params.get("duplicate") === "true") {
-            alert("Šim darbiniekam šajā datumā un maiņā ieraksts jau eksistē.");
-        }
-
-        const employeeSearchInput = document.getElementById("employeeSearchInput");
-        const employeeIdInput = document.getElementById("employeeIdInput");
-        const tabelesNrInput = document.getElementById("tabelesNrInput");
-
-        if (employeeSearchInput && employeeIdInput && tabelesNrInput) {
-            employeeSearchInput.addEventListener("input", function () {
-                const value = this.value.trim();
-
-                employeeIdInput.value = "";
-                tabelesNrInput.value = "";
-
-                document.querySelectorAll("#employeeList option").forEach(function (option) {
-                    if (option.value === value) {
-                        employeeIdInput.value = option.getAttribute("data-id");
-                        tabelesNrInput.value = option.getAttribute("data-tabeles") || "";
-                    }
-                });
-            });
-        }
-
-        const addRecordForm = document.getElementById("addRecordForm");
-
-        if (addRecordForm && employeeIdInput) {
-            addRecordForm.addEventListener("submit", function (e) {
-                if (!employeeIdInput.value) {
-                    e.preventDefault();
-                    alert("Izvēlies darbinieku no saraksta.");
-                    return;
-                }
-
-                const amountInputs = addRecordForm.querySelectorAll("input[name='amount']");
-                let hasLargeValue = false;
-
-                amountInputs.forEach(function (input) {
-                    const value = Number(String(input.value).replace(",", "."));
-
-                    if (value > 100) {
-                        hasLargeValue = true;
-                    }
-                });
-
-                if (hasLargeValue) {
-                    const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
-
-                    if (!confirmed) {
-                        e.preventDefault();
-                        return;
-                    }
-                }
-
-                const submitButton = addRecordForm.querySelector("button[type='submit']");
-
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    submitButton.innerText = "Saglabā...";
-                }
-            });
-        }
-
-        const recordSearch = document.getElementById("recordSearch");
-
-        if (recordSearch) {
-            recordSearch.addEventListener("keyup", function () {
-                const value = this.value.toLowerCase();
-
-                document.querySelectorAll(".record-row").forEach(function (row) {
-                    const text = row.innerText.toLowerCase();
-                    row.style.display = text.includes(value) ? "" : "none";
-                });
-            });
-        }
-
-        const hasEmployeeReportParams = window.location.href.includes("summaryEmployeeId");
-        const hash = window.location.hash.replace("#", "");
-
-        if (hash === "monthlySummary") {
-            window.showSection("monthlySummary");
-        } else if (hash === "shiftComparison") {
-            window.showSection("shiftComparison");
-        } else if (hash === "shiftBonus") {
-            window.showSection("shiftBonus");
-        } else if (hash === "employeeReport" || hasEmployeeReportParams) {
-            window.showSection("employeeReport");
-        } else {
-            window.showSection("mainMenu");
+            section.style.display = "none";
         }
     });
+};
+
+window.showSection = function (id) {
+    window.hideAllSections();
+
+    document.querySelectorAll(".wow-menu-item").forEach(function (item) {
+        item.classList.remove("active");
+    });
+
+    const activeItem = document.querySelector('.wow-menu-item[href="#' + id + '"]');
+    if (activeItem) {
+        activeItem.classList.add("active");
+    }
+
+    const section = document.getElementById(id);
+    if (section) {
+        section.style.display = "block";
+    }
+
+    history.replaceState(null, null, "#" + id);
+
+    if (id === "shiftBonus") {
+        window.filterShiftBonus();
+    }
+};
+
+window.formatEuro = function (value) {
+    return value.toLocaleString("lv-LV", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }) + " €";
+};
+
+window.parseBonus = function (value) {
+    if (!value) {
+        return 0;
+    }
+
+    return Number(String(value).replace(",", ".")) || 0;
+};
+
+window.filterShiftBonus = function () {
+    const monthInput = document.getElementById("shiftBonusMonth");
+    const shiftInput = document.getElementById("shiftBonusShift");
+    const employeeInput = document.getElementById("shiftBonusEmployee");
+
+    if (!monthInput || !shiftInput || !employeeInput) {
+        return;
+    }
+
+    const month = monthInput.value;
+    const shift = shiftInput.value;
+    const employee = employeeInput.value;
+
+    let total = 0;
+
+    document.querySelectorAll(".shift-bonus-row").forEach(function (row) {
+        const rowDate = row.getAttribute("data-date") || "";
+        const rowMonth = rowDate.substring(0, 7);
+        const rowShift = row.getAttribute("data-shift") || "";
+        const rowEmployee = row.getAttribute("data-employee") || "";
+        const rowBonus = window.parseBonus(row.getAttribute("data-bonus"));
+
+        const monthOk = !month || rowMonth === month;
+        const shiftOk = !shift || rowShift === shift;
+        const employeeOk = !employee || rowEmployee === employee;
+
+        if (monthOk && shiftOk && employeeOk) {
+            row.style.display = "";
+            total += rowBonus;
+        } else {
+            row.style.display = "none";
+        }
+    });
+
+    const totalEl = document.getElementById("shiftBonusTotal");
+
+    if (totalEl) {
+        totalEl.innerText = window.formatEuro(total);
+    }
+};
+
+window.addEventListener("load", function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("duplicate") === "true") {
+        alert("Šim darbiniekam šajā datumā un maiņā ieraksts jau eksistē.");
+    }
+
+    const employeeSearchInput = document.getElementById("employeeSearchInput");
+    const employeeIdInput = document.getElementById("employeeIdInput");
+    const tabelesNrInput = document.getElementById("tabelesNrInput");
+
+    if (employeeSearchInput && employeeIdInput && tabelesNrInput) {
+        employeeSearchInput.addEventListener("input", function () {
+            const value = this.value.trim();
+
+            employeeIdInput.value = "";
+            tabelesNrInput.value = "";
+
+            document.querySelectorAll("#employeeList option").forEach(function (option) {
+                if (option.value === value) {
+                    employeeIdInput.value = option.getAttribute("data-id");
+                    tabelesNrInput.value = option.getAttribute("data-tabeles") || "";
+                }
+            });
+        });
+    }
+
+    const addRecordForm = document.getElementById("addRecordForm");
+
+    if (addRecordForm && employeeIdInput) {
+        addRecordForm.addEventListener("submit", function (e) {
+            if (!employeeIdInput.value) {
+                e.preventDefault();
+                alert("Izvēlies darbinieku no saraksta.");
+                return;
+            }
+
+            const amountInputs = addRecordForm.querySelectorAll("input[name='amount']");
+            let hasLargeValue = false;
+
+            amountInputs.forEach(function (input) {
+                const value = Number(String(input.value).replace(",", "."));
+
+                if (value > 100) {
+                    hasLargeValue = true;
+                }
+            });
+
+            if (hasLargeValue) {
+                const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
+                if (!confirmed) {
+                    e.preventDefault();
+                    return;
+                }
+            }
+
+            const submitButton = addRecordForm.querySelector("button[type='submit']");
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerText = "Saglabā...";
+            }
+        });
+    }
+
+    const recordSearch = document.getElementById("recordSearch");
+
+    if (recordSearch) {
+        recordSearch.addEventListener("keyup", function () {
+            const value = this.value.toLowerCase();
+
+            document.querySelectorAll(".record-row").forEach(function (row) {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? "" : "none";
+            });
+        });
+    }
+
+    const hasEmployeeReportParams = window.location.href.includes("summaryEmployeeId");
+    const hash = window.location.hash.replace("#", "");
+
+    if (hash === "monthlySummary") {
+        window.showSection("monthlySummary");
+    } else if (hash === "shiftComparison") {
+        window.showSection("shiftComparison");
+    } else if (hash === "shiftBonus") {
+        window.showSection("shiftBonus");
+    } else if (hash === "employeeReport" || hasEmployeeReportParams) {
+        window.showSection("employeeReport");
+    } else {
+        window.showSection("mainMenu");
+    }
+});
 </script>
 </body>
 </html>
