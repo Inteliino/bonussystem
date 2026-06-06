@@ -13,9 +13,7 @@
     <div class="wow-dashboard-header">
 
         <div class="wow-brand">
-            <div class="wow-logo">
-                🏭
-            </div>
+            <div class="wow-logo">🏭</div>
             <div>
                 <h1>Maiņu attinēju prēmijas</h1>
                 <p>Maiņu prēmiju uzskaite</p>
@@ -33,27 +31,27 @@
 
     <div class="wow-menu-card">
 
-        <a class="wow-menu-item active" href="#mainMenu" onclick="showSection('mainMenu')">
+        <a class="wow-menu-item active" href="javascript:void(0)" onclick="showSection('mainMenu')">
             <span>🏠</span>
             <strong>Main Menu</strong>
         </a>
 
-        <a class="wow-menu-item" href="#monthlySummary" onclick="showSection('monthlySummary')">
+        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('monthlySummary')">
             <span>📅</span>
             <strong>Kopsavilkums pa mēnešiem</strong>
         </a>
 
-        <a class="wow-menu-item" href="#shiftComparison" onclick="showSection('shiftComparison')">
+        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('shiftComparison')">
             <span>📈</span>
             <strong>Maiņu salīdzinājums</strong>
         </a>
 
-        <a class="wow-menu-item" href="#shiftBonus" onclick="showSection('shiftBonus')">
+        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('shiftBonus')">
             <span>🎁</span>
             <strong>Prēmijas pa maiņām</strong>
         </a>
 
-        <a class="wow-menu-item" href="#employeeReport" onclick="showSection('employeeReport')">
+        <a class="wow-menu-item" href="javascript:void(0)" onclick="showSection('employeeReport')">
             <span>👤</span>
             <strong>Darbinieka atskaite</strong>
         </a>
@@ -74,9 +72,7 @@
         </a>
 
         <form th:if="${isAdmin}" th:action="@{/recalculate-bonuses}" method="post" class="wow-recalculate">
-            <button type="submit">
-                🔄 Pārrēķināt bonusus
-            </button>
+            <button type="submit">🔄 Pārrēķināt bonusus</button>
         </form>
 
     </div>
@@ -88,12 +84,8 @@
 
             <form id="addRecordForm" class="form-grid" th:action="@{/add-record}" method="post">
 
-                <input type="text"
-                       id="employeeSearchInput"
-                       list="employeeList"
-                       placeholder="Raksti vai izvēlies darbinieku"
-                       autocomplete="off"
-                       required>
+                <input type="text" id="employeeSearchInput" list="employeeList"
+                       placeholder="Raksti vai izvēlies darbinieku" autocomplete="off" required>
 
                 <input type="hidden" name="employeeId" id="employeeIdInput">
 
@@ -161,9 +153,7 @@
                 <button type="submit" class="btn primary">Rādīt</button>
             </form>
 
-            <input type="text"
-                   id="recordSearch"
-                   class="employee-search"
+            <input type="text" id="recordSearch" class="employee-search"
                    placeholder="Meklēt pēc darbinieka, datuma, maiņas vai tabeles nr...">
 
             <div class="table-scroll">
@@ -208,7 +198,7 @@
             <div class="summary-total nowrap" th:text="${#numbers.formatDecimal(yearlyTotal,1,2)} + ' €'">0.00 €</div>
         </div>
 
-        <form class="year-filter" th:action="@{/}" method="get" onsubmit="setMonthlySummaryHash()">
+        <form class="year-filter" th:action="@{/}" method="get">
             <select name="year">
                 <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
             </select>
@@ -222,10 +212,11 @@
                 <th>Kopējā summa</th>
             </tr>
             </thead>
+
             <tbody>
-           <tr th:each="entry : ${monthlySummary}"
-    class="clickable-month-row"
-    th:onclick="|window.location.href='/?year=${selectedYear}&shiftCompareMonth=${entry.key}#monthlySummary'|">
+            <tr th:each="entry : ${monthlySummary}"
+                class="clickable-month-row"
+                th:onclick="|window.location.href='/?year=${selectedYear}&shiftCompareMonth=${entry.key}#monthlySummary'|">
                 <td class="nowrap" th:text="${entry.key}"></td>
                 <td class="bonus-green nowrap" th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'"></td>
             </tr>
@@ -243,7 +234,8 @@
             </div>
 
             <div class="position-wow-grid">
-                <div class="position-wow-card" th:each="position, iter : ${positionBonusRanking}"
+                <div class="position-wow-card"
+                     th:each="position, iter : ${positionBonusRanking}"
                      th:classappend="${position.code == 'ROBOTS' ? ' robot-card' : position.code == 'CIRSANA' ? ' cut-card' : position.code == 'PILNIE' ? ' full-card' : ' partial-card'}">
 
                     <div class="position-card-top">
@@ -254,22 +246,16 @@
                         </div>
                     </div>
 
-                    <div class="position-money"
-                         th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">
-                        0.00 €
-                    </div>
+                    <div class="position-money" th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">0.00 €</div>
 
                     <div class="position-place">
                         <span th:text="${iter.index + 1} + '. vieta'">1. vieta</span>
                     </div>
 
-                    <div class="position-mini-line">
-                        <div></div>
-                    </div>
+                    <div class="position-mini-line"><div></div></div>
 
                     <div class="position-small-text">
-                        Ieraksti:
-                        <b th:text="${position.count}">0</b>
+                        Ieraksti: <b th:text="${position.count}">0</b>
                     </div>
                 </div>
             </div>
@@ -298,16 +284,11 @@
                                     <span th:text="${position.icon}">🤖</span>
                                     <strong th:text="${position.name}">Robots</strong>
                                 </td>
-
-                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['1. maiņa'],1,2)} + ' €'">0.00 €</td>
-                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['2. maiņa'],1,2)} + ' €'">0.00 €</td>
-                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['3. maiņa'],1,2)} + ' €'">0.00 €</td>
-                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['4. maiņa'],1,2)} + ' €'">0.00 €</td>
-
-                                <td class="bonus-green"
-                                    th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">
-                                    0.00 €
-                                </td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['1. maiņa'],1,2)} + ' €'"></td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['2. maiņa'],1,2)} + ' €'"></td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['3. maiņa'],1,2)} + ' €'"></td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['4. maiņa'],1,2)} + ' €'"></td>
+                                <td class="bonus-green" th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'"></td>
                             </tr>
                             </tbody>
                         </table>
@@ -318,7 +299,7 @@
                     <h3>🏆 TOP pozīcijas</h3>
 
                     <div class="position-rank-row" th:each="position, iter : ${positionBonusRanking}">
-                        <span th:text="${iter.index == 0 ? '🥇' : iter.index == 1 ? '🥈' : iter.index == 2 ? '🥉' : '🏅'}">🥇</span>
+                        <span th:text="${iter.index == 0 ? '🥇' : iter.index == 1 ? '🥈' : iter.index == 2 ? '🥉' : '🏅'}"></span>
                         <div>
                             <strong th:text="${position.name}">Pilnie</strong>
                             <p th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">0.00 €</p>
@@ -339,13 +320,12 @@
             </div>
         </div>
 
-        <form class="year-filter" th:action="@{/}" method="get" onsubmit="setShiftComparisonHash()">
+        <form class="year-filter" th:action="@{/}" method="get">
             <select name="year">
                 <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
             </select>
 
             <input type="month" name="shiftCompareMonth" th:value="${selectedShiftCompareMonth}">
-
             <button type="submit" class="btn primary">Rādīt</button>
         </form>
 
@@ -370,54 +350,24 @@
                         <p th:text="'Maiņu skaits: ' + ${stat.shiftCount}">Maiņu skaits: 0</p>
                     </div>
 
-                    <div class="shift-wow-money"
-                         th:text="${#numbers.formatDecimal(stat.totalBonus,1,2)} + ' €'">
-                        0.00 €
-                    </div>
+                    <div class="shift-wow-money" th:text="${#numbers.formatDecimal(stat.totalBonus,1,2)} + ' €'">0.00 €</div>
                 </div>
 
                 <div class="shift-mini-stats">
-                    <div>
-                        <span>Roboti</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgRoboti,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pilnie</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgPilnie,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Nepilnie</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgNepilnie,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe I</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgPirmaPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe II</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgOtraPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe III</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgTreshaPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe IV</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgCeturtaPakape,1,0)}">0</b>
-                    </div>
+                    <div><span>Roboti</span><b th:text="${#numbers.formatDecimal(stat.avgRoboti,1,0)}">0</b></div>
+                    <div><span>Pilnie</span><b th:text="${#numbers.formatDecimal(stat.avgPilnie,1,0)}">0</b></div>
+                    <div><span>Nepilnie</span><b th:text="${#numbers.formatDecimal(stat.avgNepilnie,1,0)}">0</b></div>
+                    <div><span>Pakāpe I</span><b th:text="${#numbers.formatDecimal(stat.avgPirmaPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe II</span><b th:text="${#numbers.formatDecimal(stat.avgOtraPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe III</span><b th:text="${#numbers.formatDecimal(stat.avgTreshaPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe IV</span><b th:text="${#numbers.formatDecimal(stat.avgCeturtaPakape,1,0)}">0</b></div>
                 </div>
 
                 <div class="shift-leaders">
                     <h4>🏆 Top 2 prēmiju līderi</h4>
 
                     <div class="leader-row" th:each="leader, iter : ${stat.topLeaders}">
-                        <span th:text="${iter.index == 0 ? '🥇' : '🥈'}">🥇</span>
+                        <span th:text="${iter.index == 0 ? '🥇' : '🥈'}"></span>
                         <strong th:text="${leader.name}">Darbinieks</strong>
                         <b th:text="${#numbers.formatDecimal(leader.bonus,1,2)} + ' €'">0.00 €</b>
                     </div>
@@ -493,7 +443,7 @@
             </div>
         </div>
 
-        <form class="filter-grid" th:action="@{/}" method="get" onsubmit="setEmployeeReportHash()">
+        <form class="filter-grid" th:action="@{/}" method="get">
             <select name="summaryEmployeeId" required>
                 <option value="">Izvēlies darbinieku</option>
                 <option th:each="employee : ${employees}"
@@ -504,7 +454,6 @@
             </select>
 
             <input type="month" name="summaryMonth" th:value="${selectedSummaryMonth}" required>
-
             <button type="submit" class="btn primary">Rādīt atskaiti</button>
         </form>
 
@@ -590,6 +539,37 @@
 </div>
 
 <script>
+    function hideAllSections() {
+        ["mainMenu", "monthlySummary", "shiftComparison", "shiftBonus", "employeeReport"].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.style.display = "none";
+        });
+    }
+
+    function showSection(id) {
+        hideAllSections();
+
+        document.querySelectorAll(".wow-menu-item").forEach(function (item) {
+            item.classList.remove("active");
+        });
+
+        document.querySelectorAll(".wow-menu-item").forEach(function (item) {
+            const click = item.getAttribute("onclick") || "";
+            if (click.includes(id)) {
+                item.classList.add("active");
+            }
+        });
+
+        const section = document.getElementById(id);
+        if (section) section.style.display = "block";
+
+        window.location.hash = id;
+
+        if (id === "shiftBonus") {
+            filterShiftBonus();
+        }
+    }
+
     const employeeSearchInput = document.getElementById("employeeSearchInput");
     const employeeIdInput = document.getElementById("employeeIdInput");
     const tabelesNrInput = document.getElementById("tabelesNrInput");
@@ -597,7 +577,6 @@
     if (employeeSearchInput) {
         employeeSearchInput.addEventListener("input", function () {
             const value = this.value.trim();
-
             employeeIdInput.value = "";
             tabelesNrInput.value = "";
 
@@ -625,15 +604,11 @@
 
             amountInputs.forEach(function (input) {
                 const value = Number(String(input.value).replace(",", "."));
-
-                if (value > 100) {
-                    hasLargeValue = true;
-                }
+                if (value > 100) hasLargeValue = true;
             });
 
             if (hasLargeValue) {
                 const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
-
                 if (!confirmed) {
                     e.preventDefault();
                     return;
@@ -641,7 +616,6 @@
             }
 
             const submitButton = addRecordForm.querySelector("button[type='submit']");
-
             if (submitButton) {
                 submitButton.disabled = true;
                 submitButton.innerText = "Saglabā...";
@@ -654,61 +628,12 @@
     if (recordSearch) {
         recordSearch.addEventListener("keyup", function () {
             const value = this.value.toLowerCase();
-            const rows = document.querySelectorAll(".record-row");
 
-            rows.forEach(function (row) {
+            document.querySelectorAll(".record-row").forEach(function (row) {
                 const text = row.innerText.toLowerCase();
                 row.style.display = text.includes(value) ? "" : "none";
             });
         });
-    }
-
-    function hideAllSections() {
-        document.getElementById("mainMenu").style.display = "none";
-        document.getElementById("monthlySummary").style.display = "none";
-        document.getElementById("shiftComparison").style.display = "none";
-        document.getElementById("shiftBonus").style.display = "none";
-        document.getElementById("employeeReport").style.display = "none";
-    }
-
-    function showSection(id) {
-        hideAllSections();
-
-        document.querySelectorAll(".wow-menu-item").forEach(item => {
-            item.classList.remove("active");
-        });
-
-        const activeItem = document.querySelector('.wow-menu-item[href="#' + id + '"]');
-        if (activeItem) {
-            activeItem.classList.add("active");
-        }
-
-        const section = document.getElementById(id);
-        if (section) {
-            section.style.display = "block";
-        }
-
-        if (id === "shiftBonus") {
-            filterShiftBonus();
-        }
-    }
-
-    function setEmployeeReportHash() {
-        setTimeout(function () {
-            window.location.hash = "employeeReport";
-        }, 10);
-    }
-
-    function setMonthlySummaryHash() {
-        setTimeout(function () {
-            window.location.hash = "monthlySummary";
-        }, 10);
-    }
-
-    function setShiftComparisonHash() {
-        setTimeout(function () {
-            window.location.hash = "shiftComparison";
-        }, 10);
     }
 
     function formatEuro(value) {
@@ -734,11 +659,9 @@
         const shift = shiftInput.value;
         const employee = employeeInput.value;
 
-        const rows = document.querySelectorAll(".shift-bonus-row");
-
         let total = 0;
 
-        rows.forEach(row => {
+        document.querySelectorAll(".shift-bonus-row").forEach(function (row) {
             const rowDate = row.getAttribute("data-date") || "";
             const rowMonth = rowDate.substring(0, 7);
             const rowShift = row.getAttribute("data-shift") || "";
@@ -769,14 +692,15 @@
         }
 
         const hasEmployeeReportParams = window.location.href.includes("summaryEmployeeId");
+        const hash = window.location.hash.replace("#", "");
 
-        if (window.location.hash === "#monthlySummary") {
+        if (hash === "monthlySummary") {
             showSection("monthlySummary");
-        } else if (window.location.hash === "#shiftComparison") {
+        } else if (hash === "shiftComparison") {
             showSection("shiftComparison");
-        } else if (window.location.hash === "#shiftBonus") {
+        } else if (hash === "shiftBonus") {
             showSection("shiftBonus");
-        } else if (window.location.hash === "#employeeReport" || hasEmployeeReportParams) {
+        } else if (hash === "employeeReport" || hasEmployeeReportParams) {
             showSection("employeeReport");
         } else {
             showSection("mainMenu");
@@ -784,16 +708,16 @@
     });
 
     window.addEventListener("hashchange", function () {
-        if (window.location.hash === "#monthlySummary") {
+        const hash = window.location.hash.replace("#", "");
+
+        if (hash === "monthlySummary") {
             showSection("monthlySummary");
-        } else if (window.location.hash === "#shiftComparison") {
+        } else if (hash === "shiftComparison") {
             showSection("shiftComparison");
-        } else if (window.location.hash === "#shiftBonus") {
+        } else if (hash === "shiftBonus") {
             showSection("shiftBonus");
-        } else if (window.location.hash === "#employeeReport") {
+        } else if (hash === "employeeReport") {
             showSection("employeeReport");
-        } else {
-            showSection("mainMenu");
         }
     });
 </script>
