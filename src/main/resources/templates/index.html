@@ -223,7 +223,9 @@
             </tr>
             </thead>
             <tbody>
-            <tr th:each="entry : ${monthlySummary}">
+           <tr th:each="entry : ${monthlySummary}"
+    class="clickable-month-row"
+    th:onclick="|window.location.href='/?year=${selectedYear}&shiftCompareMonth=${entry.key}#monthlySummary'|">
                 <td class="nowrap" th:text="${entry.key}"></td>
                 <td class="bonus-green nowrap" th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'"></td>
             </tr>
