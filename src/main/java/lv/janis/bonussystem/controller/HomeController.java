@@ -174,6 +174,13 @@ public class HomeController {
             );
         }
 
+        Map<String, PositionBonusStats> positionBonusStats = createPositionBonusStats(shiftCompareRecords, shifts);
+
+        List<PositionBonusStats> positionBonusRanking = positionBonusStats.values()
+                .stream()
+                .sorted(Comparator.comparingDouble(PositionBonusStats::getAverageBonus).reversed())
+                .toList();
+
         Employee selectedSummaryEmployee = null;
         List<WorkRecord> employeeRecords = new ArrayList<>();
 
@@ -276,6 +283,9 @@ public class HomeController {
         model.addAttribute("shiftSummary", shiftSummary);
         model.addAttribute("shiftStats", shiftStats);
 
+        model.addAttribute("positionBonusStats", positionBonusStats);
+        model.addAttribute("positionBonusRanking", positionBonusRanking);
+
         model.addAttribute("selectedShift", shiftName);
         model.addAttribute("selectedMonth", selectedMonthValue);
         model.addAttribute("selectedShiftCompareMonth", selectedShiftCompareMonthValue);
@@ -303,6 +313,47 @@ public class HomeController {
         model.addAttribute("totalNepilnieKopa", totalNepilnieKopa);
 
         return "index";
+    }
+
+    private Map<String, PositionBonusStats> createPositionBonusStats(List<WorkRecord> records, List<String> shifts) {
+        Map<String, PositionBonusStats> map = new LinkedHashMap<>();
+
+        map.put("Robots", new PositionBonusStats("Robots", "🤖", "ROBOTS", shifts));
+        map.put("Ciršana", new PositionBonusStats("Ciršana", "✂️", "CIRSANA", shifts));
+        map.put("Pilnie", new PositionBonusStats("Pilnie", "📦", "PILNIE", shifts));
+        map.put("Nepilnie", new PositionBonusStats("Nepilnie", "💎", "NEPILNIE", shifts));
+
+        for (WorkRecord record : records) {
+            if (record.getShiftName() == null) {
+                continue;
+            }
+
+            if (record.getRoboti() > 0) {
+                map.get("Robots").add(record.getShiftName(), record.getBonus());
+            }
+
+            if (record.getCirsana() > 0 || record.getCirsanaPilnie() > 0 || record.getCirsanaNepilnie() > 0) {
+                map.get("Ciršana").add(record.getShiftName(), record.getBonus());
+            }
+
+            if (record.getPilnie() > 0) {
+                map.get("Pilnie").add(record.getShiftName(), record.getBonus());
+            }
+
+            if (record.getNepilnie() > 0
+                    || record.getPirmaPakape() > 0
+                    || record.getOtraPakape() > 0
+                    || record.getTreshaPakape() > 0
+                    || record.getCeturtaPakape() > 0) {
+                map.get("Nepilnie").add(record.getShiftName(), record.getBonus());
+            }
+        }
+
+        for (PositionBonusStats stats : map.values()) {
+            stats.calculate();
+        }
+
+        return map;
     }
 
     @PostMapping("/add-record")
@@ -653,6 +704,82 @@ public class HomeController {
 
         public void setTopLeaders(List<ShiftLeader> topLeaders) {
             this.topLeaders = topLeaders;
+        }
+    }
+
+    public static class PositionBonusStats {
+
+        private String name;
+        private String icon;
+        private String code;
+
+        private double totalBonus;
+        private int count;
+        private double averageBonus;
+
+        private Map<String, Double> shiftTotals = new LinkedHashMap<>();
+        private Map<String, Integer> shiftCounts = new LinkedHashMap<>();
+        private Map<String, Double> shiftAverages = new LinkedHashMap<>();
+
+        public PositionBonusStats(String name, String icon, String code, List<String> shifts) {
+            this.name = name;
+            this.icon = icon;
+            this.code = code;
+
+            for (String shift : shifts) {
+                shiftTotals.put(shift, 0.0);
+                shiftCounts.put(shift, 0);
+                shiftAverages.put(shift, 0.0);
+            }
+        }
+
+        public void add(String shiftName, double bonus) {
+            totalBonus += bonus;
+            count++;
+
+            if (shiftTotals.containsKey(shiftName)) {
+                shiftTotals.put(shiftName, shiftTotals.get(shiftName) + bonus);
+                shiftCounts.put(shiftName, shiftCounts.get(shiftName) + 1);
+            }
+        }
+
+        public void calculate() {
+            averageBonus = count == 0 ? 0 : totalBonus / count;
+
+            for (String shift : shiftTotals.keySet()) {
+                int shiftCount = shiftCounts.get(shift);
+                double shiftTotal = shiftTotals.get(shift);
+
+                shiftAverages.put(shift, shiftCount == 0 ? 0 : shiftTotal / shiftCount);
+            }
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public double getTotalBonus() {
+            return totalBonus;
+        }
+
+        public int getCount() {
+            return count;
+        }
+
+        public double getAverageBonus() {
+            return averageBonus;
+        }
+
+        public Map<String, Double> getShiftAverages() {
+            return shiftAverages;
         }
     }
 }

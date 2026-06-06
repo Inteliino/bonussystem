@@ -1215,3 +1215,195 @@ tbody tr:hover {
     font-weight: 700;
     color: white;
 }
+.position-wow-section {
+    margin-top: 34px;
+}
+
+.position-header {
+    margin-top: 10px;
+}
+
+.position-wow-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 20px;
+}
+
+.position-wow-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 230px;
+    padding: 22px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow: 0 20px 50px rgba(0,0,0,.28);
+}
+
+.position-card-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.position-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.09);
+    font-size: 25px;
+}
+
+.position-wow-card h3 {
+    margin: 0;
+    font-size: 20px;
+}
+
+.position-wow-card p {
+    margin: 4px 0 0;
+    color: #b8c6d8;
+    font-weight: 800;
+}
+
+.position-money {
+    margin-top: 28px;
+    font-size: 38px;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+.position-place {
+    margin-top: 14px;
+}
+
+.position-place span {
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    font-weight: 900;
+}
+
+.position-mini-line {
+    margin-top: 26px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.10);
+    overflow: hidden;
+}
+
+.position-mini-line div {
+    width: 70%;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #1685ff, #7c3aed, #22c55e);
+}
+
+.position-small-text {
+    margin-top: 14px;
+    color: #b8c6d8;
+    font-weight: 800;
+}
+
+.position-small-text b {
+    color: #fff;
+}
+
+.robot-card {
+    background:
+        radial-gradient(circle at 20% 15%, rgba(14,165,233,.25), transparent 36%),
+        rgba(255,255,255,.055);
+    border-color: rgba(14,165,233,.25);
+}
+
+.cut-card {
+    background:
+        radial-gradient(circle at 20% 15%, rgba(168,85,247,.25), transparent 36%),
+        rgba(255,255,255,.055);
+    border-color: rgba(168,85,247,.25);
+}
+
+.full-card {
+    background:
+        radial-gradient(circle at 20% 15%, rgba(34,197,94,.25), transparent 36%),
+        rgba(255,255,255,.055);
+    border-color: rgba(34,197,94,.25);
+}
+
+.partial-card {
+    background:
+        radial-gradient(circle at 20% 15%, rgba(249,115,22,.25), transparent 36%),
+        rgba(255,255,255,.055);
+    border-color: rgba(249,115,22,.25);
+}
+
+.position-bottom-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+}
+
+.position-table-card,
+.position-ranking-card {
+    padding: 20px;
+    border-radius: 22px;
+    background: rgba(255,255,255,.055);
+    border: 1px solid rgba(255,255,255,.12);
+}
+
+.position-table-card h3,
+.position-ranking-card h3 {
+    margin: 0 0 16px;
+}
+
+.position-rank-row {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.10);
+}
+
+.position-rank-row span {
+    font-size: 26px;
+}
+
+.position-rank-row strong {
+    color: #fff;
+    font-size: 16px;
+}
+
+.position-rank-row p {
+    margin: 4px 0 0;
+    color: #4ade80;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+@media (max-width: 1100px) {
+    .position-wow-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .position-bottom-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 650px) {
+    .position-wow-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .position-money {
+        font-size: 32px;
+    }
+}

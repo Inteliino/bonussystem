@@ -229,6 +229,104 @@
             </tr>
             </tbody>
         </table>
+
+        <div class="position-wow-section">
+
+            <div class="section-header position-header">
+                <div>
+                    <h2>📊 Vidējā prēmija pa pozīcijām</h2>
+                    <p>Aprēķins pēc izvēlētā mēneša sadaļā "Maiņu salīdzinājums"</p>
+                </div>
+                <div class="summary-total nowrap" th:text="${selectedShiftCompareMonth}">2026-01</div>
+            </div>
+
+            <div class="position-wow-grid">
+                <div class="position-wow-card" th:each="position, iter : ${positionBonusRanking}"
+                     th:classappend="${position.code == 'ROBOTS' ? ' robot-card' : position.code == 'CIRSANA' ? ' cut-card' : position.code == 'PILNIE' ? ' full-card' : ' partial-card'}">
+
+                    <div class="position-card-top">
+                        <div class="position-icon" th:text="${position.icon}">🤖</div>
+                        <div>
+                            <h3 th:text="${position.name}">Robots</h3>
+                            <p>Vidējais bonuss</p>
+                        </div>
+                    </div>
+
+                    <div class="position-money"
+                         th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">
+                        0.00 €
+                    </div>
+
+                    <div class="position-place">
+                        <span th:text="${iter.index + 1} + '. vieta'">1. vieta</span>
+                    </div>
+
+                    <div class="position-mini-line">
+                        <div></div>
+                    </div>
+
+                    <div class="position-small-text">
+                        Ieraksti:
+                        <b th:text="${position.count}">0</b>
+                    </div>
+                </div>
+            </div>
+
+            <div class="position-bottom-grid">
+
+                <div class="position-table-card">
+                    <h3>Vidējā prēmija pa pozīcijām pa maiņām</h3>
+
+                    <div class="table-scroll">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Pozīcija</th>
+                                <th>1. maiņa</th>
+                                <th>2. maiņa</th>
+                                <th>3. maiņa</th>
+                                <th>4. maiņa</th>
+                                <th>Kopā vidēji</th>
+                            </tr>
+                            </thead>
+
+                            <tbody>
+                            <tr th:each="position : ${positionBonusStats.values()}">
+                                <td>
+                                    <span th:text="${position.icon}">🤖</span>
+                                    <strong th:text="${position.name}">Robots</strong>
+                                </td>
+
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['1. maiņa'],1,2)} + ' €'">0.00 €</td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['2. maiņa'],1,2)} + ' €'">0.00 €</td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['3. maiņa'],1,2)} + ' €'">0.00 €</td>
+                                <td th:text="${#numbers.formatDecimal(position.shiftAverages['4. maiņa'],1,2)} + ' €'">0.00 €</td>
+
+                                <td class="bonus-green"
+                                    th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">
+                                    0.00 €
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="position-ranking-card">
+                    <h3>🏆 TOP pozīcijas</h3>
+
+                    <div class="position-rank-row" th:each="position, iter : ${positionBonusRanking}">
+                        <span th:text="${iter.index == 0 ? '🥇' : iter.index == 1 ? '🥈' : iter.index == 2 ? '🥉' : '🏅'}">🥇</span>
+                        <div>
+                            <strong th:text="${position.name}">Pilnie</strong>
+                            <p th:text="${#numbers.formatDecimal(position.averageBonus,1,2)} + ' €'">0.00 €</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
     </div>
 
     <div id="shiftComparison" class="section-card" style="display:none;">
@@ -512,42 +610,42 @@
 
     const addRecordForm = document.getElementById("addRecordForm");
 
-    	if (addRecordForm) {
-    	    addRecordForm.addEventListener("submit", function (e) {
-    	        if (!employeeIdInput.value) {
-    	            e.preventDefault();
-    	            alert("Izvēlies darbinieku no saraksta.");
-    	            return;
-    	        }
+    if (addRecordForm) {
+        addRecordForm.addEventListener("submit", function (e) {
+            if (!employeeIdInput.value) {
+                e.preventDefault();
+                alert("Izvēlies darbinieku no saraksta.");
+                return;
+            }
 
-    	        const amountInputs = addRecordForm.querySelectorAll("input[name='amount']");
-    	        let hasLargeValue = false;
+            const amountInputs = addRecordForm.querySelectorAll("input[name='amount']");
+            let hasLargeValue = false;
 
-    	        amountInputs.forEach(function (input) {
-    	            const value = Number(String(input.value).replace(",", "."));
+            amountInputs.forEach(function (input) {
+                const value = Number(String(input.value).replace(",", "."));
 
-    	            if (value > 100) {
-    	                hasLargeValue = true;
-    	            }
-    	        });
+                if (value > 100) {
+                    hasLargeValue = true;
+                }
+            });
 
-    	        if (hasLargeValue) {
-    	            const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
+            if (hasLargeValue) {
+                const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
 
-    	            if (!confirmed) {
-    	                e.preventDefault();
-    	                return;
-    	            }
-    	        }
+                if (!confirmed) {
+                    e.preventDefault();
+                    return;
+                }
+            }
 
-    	        const submitButton = addRecordForm.querySelector("button[type='submit']");
+            const submitButton = addRecordForm.querySelector("button[type='submit']");
 
-    	        if (submitButton) {
-    	            submitButton.disabled = true;
-    	            submitButton.innerText = "Saglabā...";
-    	        }
-    	    });
-    	}
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.innerText = "Saglabā...";
+            }
+        });
+    }
 
     const recordSearch = document.getElementById("recordSearch");
 
