@@ -721,6 +721,7 @@
         const rows = document.querySelectorAll(".shift-bonus-row");
 
         let total = 0;
+        const grouped = {};
 
         rows.forEach(row => {
             const rowDate = row.getAttribute("data-date") || "";
@@ -733,12 +734,26 @@
             const shiftOk = !shift || rowShift === shift;
             const employeeOk = !employee || rowEmployee === employee;
 
+            row.style.display = "none";
+
             if (monthOk && shiftOk && employeeOk) {
-                row.style.display = "";
+                const key = rowDate + "|" + rowShift + "|" + rowEmployee;
+
+                if (!grouped[key]) {
+                    grouped[key] = {
+                        row: row,
+                        bonus: 0
+                    };
+                }
+
+                grouped[key].bonus += rowBonus;
                 total += rowBonus;
-            } else {
-                row.style.display = "none";
             }
+        });
+
+        Object.values(grouped).forEach(item => {
+            item.row.style.display = "";
+            item.row.children[3].innerText = formatEuro(item.bonus);
         });
 
         const totalEl = document.getElementById("shiftBonusTotal");
