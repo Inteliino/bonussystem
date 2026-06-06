@@ -223,12 +223,13 @@
             </tr>
             </thead>
             <tbody>
-<tr th:each="entry : ${monthlySummary}"
-    class="clickable-month-row"
-    th:onclick="|window.location.href='/?year=${selectedYear}&shiftCompareMonth=${entry.key}#monthlySummary'|">
-    <td class="nowrap" th:text="${entry.key}"></td>
-    <td class="bonus-green nowrap" th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'"></td>
-</tr>
+            <tr th:each="entry : ${monthlySummary}"
+                class="clickable-month-row"
+                th:attr="data-month=${entry.key}"
+                onclick="openMonthSummary(this)">
+                <td class="nowrap" th:text="${entry.key}"></td>
+                <td class="bonus-green nowrap" th:text="${#numbers.formatDecimal(entry.value,1,2)} + ' €'"></td>
+            </tr>
             </tbody>
         </table>
 
@@ -377,40 +378,13 @@
                 </div>
 
                 <div class="shift-mini-stats">
-                    <div>
-                        <span>Roboti</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgRoboti,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pilnie</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgPilnie,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Nepilnie</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgNepilnie,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe I</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgPirmaPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe II</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgOtraPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe III</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgTreshaPakape,1,0)}">0</b>
-                    </div>
-
-                    <div>
-                        <span>Pakāpe IV</span>
-                        <b th:text="${#numbers.formatDecimal(stat.avgCeturtaPakape,1,0)}">0</b>
-                    </div>
+                    <div><span>Roboti</span><b th:text="${#numbers.formatDecimal(stat.avgRoboti,1,0)}">0</b></div>
+                    <div><span>Pilnie</span><b th:text="${#numbers.formatDecimal(stat.avgPilnie,1,0)}">0</b></div>
+                    <div><span>Nepilnie</span><b th:text="${#numbers.formatDecimal(stat.avgNepilnie,1,0)}">0</b></div>
+                    <div><span>Pakāpe I</span><b th:text="${#numbers.formatDecimal(stat.avgPirmaPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe II</span><b th:text="${#numbers.formatDecimal(stat.avgOtraPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe III</span><b th:text="${#numbers.formatDecimal(stat.avgTreshaPakape,1,0)}">0</b></div>
+                    <div><span>Pakāpe IV</span><b th:text="${#numbers.formatDecimal(stat.avgCeturtaPakape,1,0)}">0</b></div>
                 </div>
 
                 <div class="shift-leaders">
@@ -691,6 +665,16 @@
         if (id === "shiftBonus") {
             filterShiftBonus();
         }
+    }
+
+    function openMonthSummary(row) {
+        const month = row.getAttribute("data-month");
+
+        if (!month) {
+            return;
+        }
+
+        window.location.href = "/?shiftCompareMonth=" + month + "#monthlySummary";
     }
 
     function setEmployeeReportHash() {
