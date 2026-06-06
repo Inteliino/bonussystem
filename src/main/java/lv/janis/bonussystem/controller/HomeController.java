@@ -1,5 +1,6 @@
 package lv.janis.bonussystem.controller;
 
+import jakarta.servlet.http.HttpSession;
 import lv.janis.bonussystem.AssortmentRepository;
 import lv.janis.bonussystem.EmployeeRepository;
 import lv.janis.bonussystem.WorkRecordRepository;
@@ -11,13 +12,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -40,16 +38,35 @@ public class HomeController {
 
     @GetMapping("/")
     public String home(Model model,
+                       HttpSession session,
                        @RequestParam(required = false, defaultValue = "ALL") String shiftName,
                        @RequestParam(required = false) String month,
+                       @RequestParam(required = false) String shiftCompareMonth,
                        @RequestParam(required = false) Integer year,
                        @RequestParam(required = false) Long summaryEmployeeId,
                        @RequestParam(required = false) String summaryMonth) {
 
-        int selectedYear = year != null ? year : LocalDate.now().getYear();
+        LocalDate today = LocalDate.now();
+        YearMonth currentMonth = YearMonth.now();
+
+        int selectedYear = year != null ? year : today.getYear();
+
+        String selectedMonthValue = (month == null || month.isBlank())
+                ? currentMonth.toString()
+                : month;
+
+        String selectedShiftCompareMonthValue = (shiftCompareMonth == null || shiftCompareMonth.isBlank())
+                ? currentMonth.toString()
+                : shiftCompareMonth;
+
+        String selectedSummaryMonthValue = (summaryMonth == null || summaryMonth.isBlank())
+                ? currentMonth.toString()
+                : summaryMonth;
+
+        boolean isAdmin = isAdmin(session);
 
         List<Integer> years = new ArrayList<>();
-        for (int y = LocalDate.now().getYear() - 3; y <= LocalDate.now().getYear() + 1; y++) {
+        for (int y = today.getYear() - 3; y <= today.getYear() + 1; y++) {
             years.add(y);
         }
 
@@ -63,6 +80,7 @@ public class HomeController {
         records = records.stream()
                 .filter(r -> r.getDate() != null)
                 .filter(r -> r.getDate().getYear() == selectedYear)
+                .filter(r -> YearMonth.from(r.getDate()).equals(YearMonth.parse(selectedMonthValue)))
                 .toList();
 
         if (!shiftName.equals("ALL")) {
@@ -72,22 +90,8 @@ public class HomeController {
                     .toList();
         }
 
-        if (month != null && !month.isBlank()) {
-            YearMonth selectedMonth = YearMonth.parse(month);
-
-            records = records.stream()
-                    .filter(r -> r.getDate() != null)
-                    .filter(r -> YearMonth.from(r.getDate()).equals(selectedMonth))
-                    .toList();
-        }
-
         records = records.stream()
-                .sorted((a, b) -> {
-                    if (a.getDate() == null && b.getDate() == null) return 0;
-                    if (a.getDate() == null) return 1;
-                    if (b.getDate() == null) return -1;
-                    return b.getDate().compareTo(a.getDate());
-                })
+                .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
                 .toList();
 
         double totalBonus = records.stream()
@@ -116,19 +120,14 @@ public class HomeController {
         Map<String, Double> shiftSummary = new LinkedHashMap<>();
         List<String> shifts = List.of("1. maiņa", "2. maiņa", "3. maiņa", "4. maiņa");
 
+        YearMonth selectedShiftCompareMonth = YearMonth.parse(selectedShiftCompareMonthValue);
+
         for (String shift : shifts) {
             double shiftTotal = allRecords.stream()
                     .filter(r -> r.getDate() != null)
-                    .filter(r -> r.getDate().getYear() == selectedYear)
+                    .filter(r -> YearMonth.from(r.getDate()).equals(selectedShiftCompareMonth))
                     .filter(r -> r.getShiftName() != null)
                     .filter(r -> r.getShiftName().equals(shift))
-                    .filter(r -> {
-                        if (month == null || month.isBlank()) {
-                            return true;
-                        }
-
-                        return YearMonth.from(r.getDate()).equals(YearMonth.parse(month));
-                    })
                     .mapToDouble(WorkRecord::getBonus)
                     .sum();
 
@@ -143,15 +142,8 @@ public class HomeController {
 
         List<WorkRecord> shiftCompareRecords = allRecords.stream()
                 .filter(r -> r.getDate() != null)
-                .filter(r -> r.getDate().getYear() == selectedYear)
+                .filter(r -> YearMonth.from(r.getDate()).equals(selectedShiftCompareMonth))
                 .filter(r -> r.getShiftName() != null)
-                .filter(r -> {
-                    if (month == null || month.isBlank()) {
-                        return true;
-                    }
-
-                    return YearMonth.from(r.getDate()).equals(YearMonth.parse(month));
-                })
                 .toList();
 
         for (WorkRecord record : shiftCompareRecords) {
@@ -205,17 +197,13 @@ public class HomeController {
         if (summaryEmployeeId != null) {
             selectedSummaryEmployee = employeeRepository.findById(summaryEmployeeId).orElse(null);
 
+            YearMonth selectedSummaryYearMonth = YearMonth.parse(selectedSummaryMonthValue);
+
             employeeRecords = allRecords.stream()
                     .filter(r -> r.getEmployee() != null)
                     .filter(r -> r.getEmployee().getId().equals(summaryEmployeeId))
                     .filter(r -> r.getDate() != null)
-                    .filter(r -> {
-                        if (summaryMonth == null || summaryMonth.isBlank()) {
-                            return r.getDate().getYear() == selectedYear;
-                        }
-
-                        return YearMonth.from(r.getDate()).equals(YearMonth.parse(summaryMonth));
-                    })
+                    .filter(r -> YearMonth.from(r.getDate()).equals(selectedSummaryYearMonth))
                     .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
                     .toList();
 
@@ -223,7 +211,7 @@ public class HomeController {
                     .mapToDouble(WorkRecord::getBonus)
                     .sum();
 
-            employeeShiftCount = employeeRecords.size();
+            employeeShiftCount = countUniqueShifts(employeeRecords);
 
             double totalRoboti = employeeRecords.stream().mapToDouble(WorkRecord::getRoboti).sum();
             double totalCirsana = employeeRecords.stream().mapToDouble(WorkRecord::getCirsana).sum();
@@ -276,6 +264,10 @@ public class HomeController {
         model.addAttribute("assortments", assortmentRepository.findByActiveTrue());
         model.addAttribute("records", records);
 
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("todayDate", today.toString());
+        model.addAttribute("currentMonth", currentMonth.toString());
+
         model.addAttribute("totalBonus", totalBonus);
 
         model.addAttribute("monthlySummary", monthlySummary);
@@ -285,13 +277,14 @@ public class HomeController {
         model.addAttribute("shiftStats", shiftStats);
 
         model.addAttribute("selectedShift", shiftName);
-        model.addAttribute("selectedMonth", month);
-        model.addAttribute("selectedYear", selectedYear);
+        model.addAttribute("selectedMonth", selectedMonthValue);
+        model.addAttribute("selectedShiftCompareMonth", selectedShiftCompareMonthValue);
+        model.addAttribute("selectedSummaryMonth", selectedSummaryMonthValue);
         model.addAttribute("years", years);
 
         model.addAttribute("summaryEmployeeId", summaryEmployeeId);
-        model.addAttribute("selectedSummaryMonth", summaryMonth);
         model.addAttribute("selectedSummaryEmployee", selectedSummaryEmployee);
+        model.addAttribute("selectedYear", selectedYear);
         model.addAttribute("employeeRecords", employeeRecords);
         model.addAttribute("employeeTotalBonus", employeeTotalBonus);
 
@@ -321,12 +314,18 @@ public class HomeController {
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
 
+        LocalDate recordDate = parseDate(date);
+
+        if (workRecordRepository.existsByEmployee_IdAndDateAndShiftName(employeeId, recordDate, shiftName)) {
+            return "redirect:/?duplicate=true";
+        }
+
         WorkRecord record = new WorkRecord();
 
         record.setEmployee(employee);
         record.setTabelesNr(employee.getTabelesNr());
         record.setShiftName(shiftName);
-        record.setDate(parseDate(date));
+        record.setDate(recordDate);
 
         if (workType != null && amount != null) {
             for (int i = 0; i < workType.size(); i++) {
@@ -424,7 +423,11 @@ public class HomeController {
     }
 
     @PostMapping("/recalculate-bonuses")
-    public String recalculateBonuses() {
+    public String recalculateBonuses(HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return "redirect:/";
+        }
 
         List<WorkRecord> records = workRecordRepository.findAll();
 
@@ -450,6 +453,47 @@ public class HomeController {
         }
 
         return Double.parseDouble(value.replace(",", "."));
+    }
+
+    private int countUniqueShifts(List<WorkRecord> records) {
+        Set<String> uniqueShifts = new HashSet<>();
+
+        for (WorkRecord record : records) {
+            if (record.getDate() != null && record.getShiftName() != null) {
+                uniqueShifts.add(record.getDate() + "|" + record.getShiftName());
+            }
+        }
+
+        return uniqueShifts.size();
+    }
+
+    private boolean isAdmin(HttpSession session) {
+        Object loggedUser = session.getAttribute("loggedUser");
+
+        if (loggedUser == null) {
+            return false;
+        }
+
+        String username = readStringValue(loggedUser, "getUsername");
+        String role = readStringValue(loggedUser, "getRole");
+
+        return "ADMIN".equalsIgnoreCase(role)
+                || ("JanisR".equalsIgnoreCase(username) && "ADMIN".equalsIgnoreCase(role));
+    }
+
+    private String readStringValue(Object object, String methodName) {
+        try {
+            Method method = object.getClass().getMethod(methodName);
+            Object value = method.invoke(object);
+
+            if (value == null) {
+                return "";
+            }
+
+            return value.toString();
+        } catch (Exception e) {
+            return "";
+        }
     }
 
     public static class ShiftLeader {
@@ -500,6 +544,8 @@ public class HomeController {
         private int treshaCount;
         private int ceturtaCount;
 
+        private Set<String> uniqueShifts = new HashSet<>();
+
         private List<ShiftLeader> topLeaders = new ArrayList<>();
 
         public ShiftStats(String shiftName) {
@@ -507,7 +553,10 @@ public class HomeController {
         }
 
         public void addRecord(WorkRecord record) {
-            shiftCount++;
+            if (record.getDate() != null && record.getShiftName() != null) {
+                uniqueShifts.add(record.getDate() + "|" + record.getShiftName());
+            }
+
             totalBonus += record.getBonus();
 
             if (record.getRoboti() > 0) {
@@ -547,6 +596,8 @@ public class HomeController {
         }
 
         public void calculate() {
+            shiftCount = uniqueShifts.size();
+
             avgRoboti = robotiCount == 0 ? 0 : totalRoboti / robotiCount;
             avgPilnie = pilnieCount == 0 ? 0 : totalPilnie / pilnieCount;
             avgNepilnie = nepilnieCount == 0 ? 0 : totalNepilnie / nepilnieCount;

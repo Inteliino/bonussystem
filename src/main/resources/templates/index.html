@@ -63,7 +63,7 @@
             <strong>Darbinieki</strong>
         </a>
 
-        <a class="wow-menu-item" th:href="@{/users}">
+        <a class="wow-menu-item" th:if="${isAdmin}" th:href="@{/users}">
             <span>🛡️</span>
             <strong>Lietotāji</strong>
         </a>
@@ -86,7 +86,7 @@
         <div class="section-card">
             <h2>Pievienot maiņu</h2>
 
-            <form class="form-grid" th:action="@{/add-record}" method="post">
+            <form id="addRecordForm" class="form-grid" th:action="@{/add-record}" method="post">
 
                 <input type="text"
                        id="employeeSearchInput"
@@ -107,7 +107,7 @@
 
                 <input type="text" id="tabelesNrInput" placeholder="Tabeles Nr" readonly>
 
-                <input type="date" name="date">
+                <input type="date" name="date" th:value="${todayDate}">
 
                 <select name="shiftName" required>
                     <option value="">Izvēlies maiņu</option>
@@ -146,6 +146,20 @@
 
         <div class="section-card">
             <h2>Pievienotie ieraksti</h2>
+
+            <form class="filter-grid" th:action="@{/}" method="get">
+                <input type="month" name="month" th:value="${selectedMonth}">
+
+                <select name="shiftName">
+                    <option value="ALL" th:selected="${selectedShift == 'ALL'}">Visas maiņas</option>
+                    <option value="1. maiņa" th:selected="${selectedShift == '1. maiņa'}">1. maiņa</option>
+                    <option value="2. maiņa" th:selected="${selectedShift == '2. maiņa'}">2. maiņa</option>
+                    <option value="3. maiņa" th:selected="${selectedShift == '3. maiņa'}">3. maiņa</option>
+                    <option value="4. maiņa" th:selected="${selectedShift == '4. maiņa'}">4. maiņa</option>
+                </select>
+
+                <button type="submit" class="btn primary">Rādīt</button>
+            </form>
 
             <input type="text"
                    id="recordSearch"
@@ -229,7 +243,10 @@
             <select name="year">
                 <option th:each="y : ${years}" th:value="${y}" th:selected="${y == selectedYear}" th:text="${y}"></option>
             </select>
-            <button type="submit" class="btn primary">Rādīt gadu</button>
+
+            <input type="month" name="shiftCompareMonth" th:value="${selectedShiftCompareMonth}">
+
+            <button type="submit" class="btn primary">Rādīt</button>
         </form>
 
         <div class="chart-card">
@@ -324,7 +341,7 @@
         </div>
 
         <div class="filter-grid">
-            <input type="month" id="shiftBonusMonth">
+            <input type="month" id="shiftBonusMonth" th:value="${currentMonth}">
 
             <select id="shiftBonusShift">
                 <option value="">Visas maiņas</option>
@@ -396,7 +413,7 @@
             <div class="employee-report-title">
                 <div>
                     <h3 th:text="${selectedSummaryEmployee.name}">Darbinieks</h3>
-                    <p th:text="${selectedSummaryMonth != null and !selectedSummaryMonth.isBlank() ? selectedSummaryMonth : 'Visi mēneši'}">Mēnesis</p>
+                    <p th:text="${selectedSummaryMonth}">Mēnesis</p>
                 </div>
 
                 <div class="employee-bonus-box">
@@ -493,16 +510,44 @@
         });
     }
 
-    const addRecordForm = document.querySelector("form[action='/add-record']");
+    const addRecordForm = document.getElementById("addRecordForm");
 
-    if (addRecordForm) {
-        addRecordForm.addEventListener("submit", function (e) {
-            if (!employeeIdInput.value) {
-                e.preventDefault();
-                alert("Izvēlies darbinieku no saraksta.");
-            }
-        });
-    }
+    	if (addRecordForm) {
+    	    addRecordForm.addEventListener("submit", function (e) {
+    	        if (!employeeIdInput.value) {
+    	            e.preventDefault();
+    	            alert("Izvēlies darbinieku no saraksta.");
+    	            return;
+    	        }
+
+    	        const amountInputs = addRecordForm.querySelectorAll("input[name='amount']");
+    	        let hasLargeValue = false;
+
+    	        amountInputs.forEach(function (input) {
+    	            const value = Number(String(input.value).replace(",", "."));
+
+    	            if (value > 100) {
+    	                hasLargeValue = true;
+    	            }
+    	        });
+
+    	        if (hasLargeValue) {
+    	            const confirmed = confirm("Ievadīta ļoti liela vērtība. Vai tiešām saglabāt?");
+
+    	            if (!confirmed) {
+    	                e.preventDefault();
+    	                return;
+    	            }
+    	        }
+
+    	        const submitButton = addRecordForm.querySelector("button[type='submit']");
+
+    	        if (submitButton) {
+    	            submitButton.disabled = true;
+    	            submitButton.innerText = "Saglabā...";
+    	        }
+    	    });
+    	}
 
     const recordSearch = document.getElementById("recordSearch");
 
@@ -617,6 +662,12 @@
     }
 
     window.addEventListener("load", function () {
+        const params = new URLSearchParams(window.location.search);
+
+        if (params.get("duplicate") === "true") {
+            alert("Šim darbiniekam šajā datumā un maiņā ieraksts jau eksistē.");
+        }
+
         const hasEmployeeReportParams = window.location.href.includes("summaryEmployeeId");
 
         if (window.location.hash === "#monthlySummary") {
