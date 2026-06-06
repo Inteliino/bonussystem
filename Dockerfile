@@ -1,13 +1,13 @@
-FROM eclipse-temurin:21-jdk
+FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-COPY bonussystem/ .
+COPY pom.xml .
+COPY src ./src
 
 RUN apt-get update && apt-get install -y maven
-
 RUN mvn clean package -Dmaven.test.skip=true
 
 EXPOSE 8080
 
-CMD ["java","-jar","target/bonussystem-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "target/bonussystem-0.0.1-SNAPSHOT.jar"]
