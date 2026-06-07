@@ -1,272 +1,31 @@
-<!DOCTYPE html>
-<html lang="lv" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Bonusa nolikums</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<div class="section-card" th:if="${isAdmin}">
+    <h2>Darbinieku ierakstu vēsture</h2>
 
-<body>
+    <table>
+        <thead>
+        <tr>
+            <th>Datums</th>
+            <th>Lietotājs</th>
+            <th>Darbība</th>
+            <th>Darbinieks</th>
+            <th>Maiņa</th>
+            <th>Ieraksta datums</th>
+            <th>Bija</th>
+            <th>Tagad</th>
+        </tr>
+        </thead>
 
-<div class="container">
-
-    <div class="topbar">
-        <div class="logo-area">
-            <h1>Bonusa nolikums</h1>
-            <p>Normas, koeficienti un sortimenti</p>
-        </div>
-
-        <div class="menu-buttons">
-            <a class="btn ghost" th:href="@{/}">Atpakaļ</a>
-            <a class="btn ghost danger" th:href="@{/logout}">Iziet</a>
-        </div>
-    </div>
-
-    <div class="section-card">
-        <h2>Esošais bonusa nolikums</h2>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Nosaukums</th>
-                <th>Norma</th>
-                <th>Kombinētā norma</th>
-                <th>Solis</th>
-                <th>EUR</th>
-                <th>Virsnorma</th>
-                <th>EUR virs normas</th>
-                <th th:if="${isAdmin}">Darbība</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="rule : ${bonusRules}">
-                <td th:text="${rule.name}"></td>
-                <td th:text="${rule.normValue}"></td>
-                <td th:text="${rule.secondaryNormValue}"></td>
-                <td th:text="${rule.stepValue}"></td>
-                <td th:text="${rule.priceValue}"></td>
-                <td th:text="${rule.overNormValue}"></td>
-                <td th:text="${rule.overNormPrice}"></td>
-
-                <td th:if="${isAdmin}">
-                    <a class="small-btn blue" th:href="@{/bonus-rules/edit/{id}(id=${rule.id})}">Labot</a>
-                    <a class="small-btn red" th:href="@{/bonus-rules/delete/{id}(id=${rule.id})}">Dzēst</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section-card" th:if="${isAdmin}">
-        <h2 th:text="${editRule != null ? 'Labot normu' : 'Pievienot normu'}">Pievienot normu</h2>
-
-        <form class="form-grid" th:action="@{/bonus-rules/save}" method="post">
-
-            <input type="hidden" name="id" th:value="${editRule != null ? editRule.id : ''}">
-
-            <input type="text" name="name" placeholder="Nosaukums"
-                   th:value="${editRule != null ? editRule.name : ''}" required>
-
-            <input type="number" step="0.01" name="normValue" placeholder="Norma"
-                   th:value="${editRule != null ? editRule.normValue : ''}">
-
-            <input type="number" step="0.01" name="secondaryNormValue"
-                   placeholder="Kombinētā norma / Nepilnie normai"
-                   th:value="${editRule != null ? editRule.secondaryNormValue : ''}">
-
-            <input type="number" step="0.01" name="stepValue" placeholder="Solis"
-                   th:value="${editRule != null ? editRule.stepValue : ''}">
-
-            <input type="number" step="0.01" name="priceValue" placeholder="EUR"
-                   th:value="${editRule != null ? editRule.priceValue : ''}">
-
-            <input type="number" step="0.01" name="overNormValue" placeholder="Virsnorma"
-                   th:value="${editRule != null ? editRule.overNormValue : ''}">
-
-            <input type="number" step="0.01" name="overNormPrice" placeholder="EUR virs normas"
-                   th:value="${editRule != null ? editRule.overNormPrice : ''}">
-
-            <button type="submit" class="btn primary">Saglabāt normu</button>
-
-            <a th:if="${editRule != null}" class="btn ghost" th:href="@{/bonus-rules}">Atcelt</a>
-        </form>
-    </div>
-
-    <div class="section-card">
-        <h2>Pakāpju koeficienti</h2>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Pakāpe</th>
-                <th>Koeficients</th>
-                <th>EUR par pakāpi</th>
-                <th th:if="${isAdmin}">Darbība</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="grade : ${gradeRules}">
-                <td th:text="${grade.gradeName}"></td>
-                <td th:text="${grade.coefficient}"></td>
-                <td th:text="${grade.pricePerUnit}"></td>
-
-                <td th:if="${isAdmin}">
-                    <a class="small-btn blue" th:href="@{/grade-rules/edit/{id}(id=${grade.id})}">Labot</a>
-                    <a class="small-btn red" th:href="@{/grade-rules/delete/{id}(id=${grade.id})}">Dzēst</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <div th:if="${isAdmin}">
-            <h2 style="margin-top:22px;"
-                th:text="${editGrade != null ? 'Labot pakāpi' : 'Pievienot pakāpi'}">
-                Pievienot pakāpi
-            </h2>
-
-            <form class="form-grid" th:action="@{/grade-rules/save}" method="post">
-
-                <input type="hidden" name="id" th:value="${editGrade != null ? editGrade.id : ''}">
-
-                <select name="gradeName" required>
-                    <option value="">Izvēlies pakāpi</option>
-
-                    <option value="Nepilnie"
-                            th:selected="${editGrade != null and editGrade.gradeName == 'Nepilnie'}">
-                        Nepilnie
-                    </option>
-
-                    <option value="I"
-                            th:selected="${editGrade != null and editGrade.gradeName == 'I'}">
-                        I pakāpe
-                    </option>
-
-                    <option value="II"
-                            th:selected="${editGrade != null and editGrade.gradeName == 'II'}">
-                        II pakāpe
-                    </option>
-
-                    <option value="III"
-                            th:selected="${editGrade != null and editGrade.gradeName == 'III'}">
-                        III pakāpe
-                    </option>
-
-                    <option value="IV"
-                            th:selected="${editGrade != null and editGrade.gradeName == 'IV'}">
-                        IV pakāpe
-                    </option>
-                </select>
-
-                <input type="number" step="0.01" name="coefficient" placeholder="Koeficients"
-                       th:value="${editGrade != null ? editGrade.coefficient : ''}" required>
-
-                <input type="number" step="0.01" name="pricePerUnit" placeholder="EUR par pakāpi"
-                       th:value="${editGrade != null ? editGrade.pricePerUnit : ''}">
-
-                <button type="submit" class="btn primary">Saglabāt pakāpi</button>
-
-                <a th:if="${editGrade != null}" class="btn ghost" th:href="@{/bonus-rules}">Atcelt</a>
-            </form>
-        </div>
-    </div>
-
-    <div class="section-card">
-        <h2>Sortimenti pa pakāpēm</h2>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Sortiments</th>
-                <th>Tips</th>
-                <th>Pakāpe</th>
-                <th>Statuss</th>
-                <th th:if="${isAdmin}">Darbība</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="assortment : ${assortments}">
-                <td th:text="${assortment.name}"></td>
-                <td th:text="${assortment.type}"></td>
-                <td th:text="${assortment.gradeName}"></td>
-                <td th:text="${assortment.active ? 'Aktīvs' : 'Neaktīvs'}"></td>
-
-                <td th:if="${isAdmin}">
-                    <a class="small-btn red" th:href="@{/assortments/delete/{id}(id=${assortment.id})}">Dzēst</a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-
-        <form th:if="${isAdmin}" class="form-grid" th:action="@{/assortments/save}" method="post">
-
-            <input type="text" name="name" placeholder="Sortimenta nosaukums" required>
-
-            <select name="type" required>
-                <option value="">Izvēlies tipu</option>
-                <option value="ROBOTS">Robots</option>
-                <option value="CIRSANA">Cērtamie</option>
-                <option value="PILNIE">Pilnie</option>
-                <option value="NEPILNIE">Nepilnie</option>
-            </select>
-
-            <select name="gradeName">
-                <option value="">Pakāpe tikai nepilnajiem</option>
-                <option value="Nepilnie">Nepilnie</option>
-                <option value="I">I pakāpe</option>
-                <option value="II">II pakāpe</option>
-                <option value="III">III pakāpe</option>
-                <option value="IV">IV pakāpe</option>
-            </select>
-
-            <button type="submit" class="btn primary">Pievienot sortimentu</button>
-        </form>
-    </div>
-
-    <div class="section-card" th:if="${isAdmin}">
-        <h2>Pārrēķināt bonusus izvēlētam mēnesim</h2>
-
-        <form class="form-grid" th:action="@{/bonus-rules/recalculate-month}" method="post">
-            <input type="number" name="year" placeholder="Gads, piemēram 2026" required>
-            <input type="number" name="month" placeholder="Mēnesis, piemēram 6" min="1" max="12" required>
-
-            <button type="submit" class="btn primary">Pārrēķināt mēnesi</button>
-        </form>
-    </div>
-
-    <div class="section-card" th:if="${isAdmin}">
-        <h2>Bonusa nolikuma izmaiņu vēsture</h2>
-
-        <table>
-            <thead>
-            <tr>
-                <th>Datums</th>
-                <th>Lietotājs</th>
-                <th>Tips</th>
-                <th>Nosaukums</th>
-                <th>Lauks</th>
-                <th>Bija</th>
-                <th>Tagad</th>
-            </tr>
-            </thead>
-
-            <tbody>
-            <tr th:each="item : ${history}">
-                <td th:text="${item.changedAt}"></td>
-                <td th:text="${item.changedBy}"></td>
-                <td th:text="${item.objectType}"></td>
-                <td th:text="${item.objectName}"></td>
-                <td th:text="${item.fieldName}"></td>
-                <td th:text="${item.oldValue}"></td>
-                <td th:text="${item.newValue}"></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-
+        <tbody>
+        <tr th:each="item : ${recordHistory}">
+            <td th:text="${item.createdAt}"></td>
+            <td th:text="${item.username}"></td>
+            <td th:text="${item.action}"></td>
+            <td th:text="${item.employeeName}"></td>
+            <td th:text="${item.shiftName}"></td>
+            <td th:text="${item.recordDate}"></td>
+            <td th:text="${item.oldValue}"></td>
+            <td th:text="${item.newValue}"></td>
+        </tr>
+        </tbody>
+    </table>
 </div>
-
-</body>
-</html>

@@ -6,6 +6,7 @@ import lv.janis.bonussystem.AssortmentRepository;
 import lv.janis.bonussystem.BonusRuleHistoryRepository;
 import lv.janis.bonussystem.BonusRuleRepository;
 import lv.janis.bonussystem.GradeRuleRepository;
+import lv.janis.bonussystem.RecordAuditLogRepository;
 import lv.janis.bonussystem.model.AppUser;
 import lv.janis.bonussystem.model.Assortment;
 import lv.janis.bonussystem.model.BonusRule;
@@ -25,17 +26,20 @@ public class BonusRulesController {
     private final AssortmentRepository assortmentRepository;
     private final BonusRuleHistoryRepository historyRepository;
     private final BonusCalculatorService bonusCalculatorService;
+    private final RecordAuditLogRepository recordAuditLogRepository;
 
     public BonusRulesController(BonusRuleRepository bonusRuleRepository,
                                 GradeRuleRepository gradeRuleRepository,
                                 AssortmentRepository assortmentRepository,
                                 BonusRuleHistoryRepository historyRepository,
-                                BonusCalculatorService bonusCalculatorService) {
+                                BonusCalculatorService bonusCalculatorService,
+                                RecordAuditLogRepository recordAuditLogRepository) {
         this.bonusRuleRepository = bonusRuleRepository;
         this.gradeRuleRepository = gradeRuleRepository;
         this.assortmentRepository = assortmentRepository;
         this.historyRepository = historyRepository;
         this.bonusCalculatorService = bonusCalculatorService;
+        this.recordAuditLogRepository = recordAuditLogRepository;
     }
 
     @GetMapping("/bonus-rules")
@@ -277,6 +281,7 @@ public class BonusRulesController {
         model.addAttribute("gradeRules", gradeRuleRepository.findAll());
         model.addAttribute("assortments", assortmentRepository.findAll());
         model.addAttribute("history", historyRepository.findAllByOrderByChangedAtDesc());
+        model.addAttribute("recordAuditLogs", recordAuditLogRepository.findTop200ByOrderByCreatedAtDesc());
         model.addAttribute("editRule", editRule);
         model.addAttribute("editGrade", editGrade);
         model.addAttribute("isAdmin", isAdmin(authentication, request));

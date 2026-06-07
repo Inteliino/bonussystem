@@ -7,6 +7,7 @@ import lv.janis.bonussystem.WorkRecordRepository;
 import lv.janis.bonussystem.model.Employee;
 import lv.janis.bonussystem.model.WorkRecord;
 import lv.janis.bonussystem.service.BonusCalculatorService;
+import lv.janis.bonussystem.service.RecordAuditLogService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,15 +26,18 @@ public class HomeController {
     private final WorkRecordRepository workRecordRepository;
     private final AssortmentRepository assortmentRepository;
     private final BonusCalculatorService bonusCalculatorService;
+    private final RecordAuditLogService recordAuditLogService;
 
     public HomeController(EmployeeRepository employeeRepository,
                           WorkRecordRepository workRecordRepository,
                           AssortmentRepository assortmentRepository,
-                          BonusCalculatorService bonusCalculatorService) {
+                          BonusCalculatorService bonusCalculatorService,
+                          RecordAuditLogService recordAuditLogService) {
         this.employeeRepository = employeeRepository;
         this.workRecordRepository = workRecordRepository;
         this.assortmentRepository = assortmentRepository;
         this.bonusCalculatorService = bonusCalculatorService;
+        this.recordAuditLogService = recordAuditLogService;
     }
 
     @GetMapping("/")
@@ -361,7 +365,8 @@ public class HomeController {
                             @RequestParam String shiftName,
                             @RequestParam(required = false) String date,
                             @RequestParam(required = false) List<String> workType,
-                            @RequestParam(required = false) List<String> amount) {
+                            @RequestParam(required = false) List<String> amount,
+                            HttpSession session) {
 
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
 
@@ -410,6 +415,8 @@ public class HomeController {
         bonusCalculatorService.calculateBonus(record);
         workRecordRepository.save(record);
 
+        recordAuditLogService.logCreated(getUsername(session), record);
+
         return "redirect:/";
     }
 
@@ -438,9 +445,12 @@ public class HomeController {
                              @RequestParam(required = false) String pirmaPakape,
                              @RequestParam(required = false) String otraPakape,
                              @RequestParam(required = false) String treshaPakape,
-                             @RequestParam(required = false) String ceturtaPakape) {
+                             @RequestParam(required = false) String ceturtaPakape,
+                             HttpSession session) {
 
         WorkRecord record = workRecordRepository.findById(id).orElseThrow();
+        String oldSnapshot = recordAuditLogService.createSnapshot(record);
+
         Employee employee = employeeRepository.findById(employeeId).orElseThrow();
 
         record.setEmployee(employee);
@@ -464,11 +474,16 @@ public class HomeController {
         bonusCalculatorService.calculateBonus(record);
         workRecordRepository.save(record);
 
+        recordAuditLogService.logEdited(getUsername(session), record, oldSnapshot);
+
         return "redirect:/";
     }
 
     @GetMapping("/delete-record/{id}")
-    public String deleteRecord(@PathVariable Long id) {
+    public String deleteRecord(@PathVariable Long id, HttpSession session) {
+        WorkRecord record = workRecordRepository.findById(id).orElseThrow();
+        recordAuditLogService.logDeleted(getUsername(session), record);
+
         workRecordRepository.deleteById(id);
         return "redirect:/";
     }
@@ -530,6 +545,22 @@ public class HomeController {
 
         return "ADMIN".equalsIgnoreCase(role)
                 || ("JanisR".equalsIgnoreCase(username) && "ADMIN".equalsIgnoreCase(role));
+    }
+
+    private String getUsername(HttpSession session) {
+        Object loggedUser = session.getAttribute("loggedUser");
+
+        if (loggedUser == null) {
+            return "SYSTEM";
+        }
+
+        String username = readStringValue(loggedUser, "getUsername");
+
+        if (username == null || username.isBlank()) {
+            return "SYSTEM";
+        }
+
+        return username;
     }
 
     private String readStringValue(Object object, String methodName) {
