@@ -716,7 +716,7 @@ tbody tr:hover {
 
 .report-table {
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
     font-size: 13px;
 }
 
@@ -1933,37 +1933,42 @@ input[type=number]{
     -moz-appearance:textfield;
 }
 
-.report-table .small-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 62px;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 10px;
-}
 .report-table-wrapper {
     overflow-x: auto;
 }
+
+.report-table {
+    width: 100%;
+    min-width: 1450px;
+    table-layout: auto !important;
+}
+
+.report-table th,
+.report-table td {
+    white-space: nowrap !important;
+    padding: 10px 10px;
+}
+
 .report-actions {
-    min-width: 120px;
-    width: 120px;
+    min-width: 130px;
     text-align: right;
     white-space: nowrap;
 }
 
-.report-actions .small-btn {
+.report-actions .small-btn,
+.report-table .small-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 54px;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 10px;
+    height: 32px;
+    padding: 0 9px;
     margin-left: 4px;
+    border-radius: 10px;
 }
 
-.report-table th:last-child {
-    width: 120px;
+.report-table th:last-child,
+.report-table td:last-child {
+    width: 130px;
     text-align: right;
 }
