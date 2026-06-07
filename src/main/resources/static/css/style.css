@@ -1932,18 +1932,6 @@ input[type=number]{
     appearance:textfield;
     -moz-appearance:textfield;
 }
-.report-table th:last-child,
-.report-table td:last-child {
-    min-width: 170px;
-    text-align: right;
-    padding-right: 24px;
-}
-
-.report-table td:last-child {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-}
 
 .report-table .small-btn {
     display: inline-flex;
@@ -1956,4 +1944,26 @@ input[type=number]{
 }
 .report-table-wrapper {
     overflow-x: auto;
+}
+.report-actions {
+    min-width: 120px;
+    width: 120px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.report-actions .small-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    height: 34px;
+    padding: 0 10px;
+    border-radius: 10px;
+    margin-left: 4px;
+}
+
+.report-table th:last-child {
+    width: 120px;
+    text-align: right;
 }
