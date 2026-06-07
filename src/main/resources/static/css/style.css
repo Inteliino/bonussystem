@@ -1954,3 +1954,6 @@ input[type=number]{
     padding: 0 12px;
     border-radius: 10px;
 }
+.report-table-wrapper {
+    overflow-x: auto;
+}
