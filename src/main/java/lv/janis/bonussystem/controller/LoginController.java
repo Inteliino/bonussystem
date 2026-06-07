@@ -3,7 +3,7 @@ package lv.janis.bonussystem.controller;
 import jakarta.servlet.http.HttpSession;
 import lv.janis.bonussystem.AppUserRepository;
 import lv.janis.bonussystem.model.AppUser;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +11,12 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     private final AppUserRepository appUserRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public LoginController(AppUserRepository appUserRepository) {
+    public LoginController(AppUserRepository appUserRepository,
+                           BCryptPasswordEncoder passwordEncoder) {
         this.appUserRepository = appUserRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @GetMapping("/login")
@@ -28,11 +31,31 @@ public class LoginController {
 
         AppUser user = appUserRepository.findByUsername(username).orElse(null);
 
-        if (user == null || !user.getPassword().equals(password)) {
-            return "redirect:/login?error";
+        if (user == null) {
+            return "redirect:/login?error=true";
+        }
+
+        String dbPassword = user.getPassword();
+
+        boolean passwordOk;
+
+        if (dbPassword != null && dbPassword.startsWith("$2")) {
+            passwordOk = passwordEncoder.matches(password, dbPassword);
+        } else {
+            passwordOk = password.equals(dbPassword);
+
+            if (passwordOk) {
+                user.setPassword(passwordEncoder.encode(password));
+                appUserRepository.save(user);
+            }
+        }
+
+        if (!passwordOk) {
+            return "redirect:/login?error=true";
         }
 
         session.setAttribute("loggedUser", user);
+
         return "redirect:/";
     }
 

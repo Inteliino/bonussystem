@@ -14,29 +14,30 @@
         <div>
             <div class="users-icon">🛡️</div>
             <h1>Lietotāji</h1>
-            <p>Admin pārvalda sistēmas piekļuves un lomas</p>
+            <p>Admin pārvalda sistēmas piekļuves, lomas un paroles</p>
         </div>
 
         <div class="users-hero-actions">
-            <a href="/" class="btn ghost">Dashboard</a>
-            <a href="/employees" class="btn ghost">Darbinieki</a>
-            <a href="/logout" class="btn ghost danger">Iziet</a>
+            <a th:href="@{/}" class="btn ghost">Dashboard</a>
+            <a th:href="@{/employees}" class="btn ghost">Darbinieki</a>
+            <a th:href="@{/logout}" class="btn ghost danger">Iziet</a>
         </div>
     </div>
 
     <div class="user-wow-add">
         <div>
             <h2>➕ Pievienot lietotāju</h2>
-            <p>Izveido jaunu piekļuvi sistēmai</p>
+            <p>Parole datubāzē tiks saglabāta droši ar BCrypt</p>
         </div>
 
-        <form method="post" action="/users/add" class="user-wow-form">
+        <form method="post" th:action="@{/users/add}" class="user-wow-form">
             <input type="text" name="username" placeholder="Lietotājvārds" required>
-            <input type="text" name="password" placeholder="Parole" required>
+            <input type="password" name="password" placeholder="Parole" required>
 
             <select name="role" required>
                 <option value="USER">USER - parasts lietotājs</option>
                 <option value="ADMIN">ADMIN - pilna piekļuve</option>
+                <option value="VIEWER">VIEWER - tikai skatīšanās</option>
             </select>
 
             <button type="submit" class="btn primary">Pievienot</button>
@@ -48,7 +49,7 @@
         <div class="user-list-top">
             <div>
                 <h2>Esošie lietotāji</h2>
-                <p>Šeit vari mainīt lietotājvārdu, paroli un lomu</p>
+                <p>Šeit vari mainīt lietotāja paroli un lomu</p>
             </div>
 
             <div class="user-count-card">
@@ -58,14 +59,33 @@
             </div>
         </div>
 
+        <div class="alert success" th:if="${param.created}">
+            Lietotājs pievienots.
+        </div>
+
+        <div class="alert success" th:if="${param.passwordChanged}">
+            Parole nomainīta.
+        </div>
+
+        <div class="alert success" th:if="${param.roleChanged}">
+            Loma nomainīta.
+        </div>
+
+        <div class="alert success" th:if="${param.deleted}">
+            Lietotājs izdzēsts.
+        </div>
+
+        <div class="alert error" th:if="${param.exists}">
+            Šāds lietotājvārds jau eksistē.
+        </div>
+
+        <div class="alert error" th:if="${param.selfDelete}">
+            Tu nevari izdzēst pats sevi.
+        </div>
+
         <div class="user-cards">
 
             <div class="user-row-card" th:each="user : ${users}">
-
-                <form th:action="@{/users/edit/{id}(id=${user.id})}"
-                      method="post"
-                      th:id="'userForm' + ${user.id}">
-                </form>
 
                 <div class="user-id-badge">
                     <span>ID</span>
@@ -76,43 +96,51 @@
                     <div class="user-avatar">👤</div>
                     <div>
                         <label>Lietotājvārds</label>
-                        <input type="text"
-                               name="username"
-                               th:value="${user.username}"
-                               th:form="'userForm' + ${user.id}"
-                               required>
+                        <input type="text" th:value="${user.username}" readonly>
                     </div>
                 </div>
 
-                <div class="user-password">
-                    <label>Parole</label>
-                    <input type="text"
-                           name="password"
-                           th:value="${user.password}"
-                           th:form="'userForm' + ${user.id}"
-                           required>
-                </div>
+                <form class="user-password"
+                      th:action="@{/users/change-password/{id}(id=${user.id})}"
+                      method="post">
 
-                <div class="user-role">
+                    <label>Jauna parole</label>
+                    <input type="password"
+                           name="newPassword"
+                           placeholder="Ievadi jaunu paroli"
+                           required>
+
+                    <button type="submit" class="small-btn blue">
+                        Mainīt paroli
+                    </button>
+                </form>
+
+                <form class="user-role"
+                      th:action="@{/users/change-role/{id}(id=${user.id})}"
+                      method="post">
+
                     <label>Loma</label>
-                    <select name="role" th:form="'userForm' + ${user.id}">
+                    <select name="role" required>
                         <option value="USER" th:selected="${user.role == 'USER'}">USER</option>
                         <option value="ADMIN" th:selected="${user.role == 'ADMIN'}">ADMIN</option>
+                        <option value="VIEWER" th:selected="${user.role == 'VIEWER'}">VIEWER</option>
                     </select>
-                </div>
 
-                <div class="user-wow-actions">
-                    <button type="submit"
-                            class="small-btn blue"
-                            th:form="'userForm' + ${user.id}">
+                    <button type="submit" class="small-btn orange">
                         Saglabāt
                     </button>
+                </form>
 
-                    <a th:href="@{/users/delete/{id}(id=${user.id})}"
-                       class="small-btn red"
-                       onclick="return confirm('Tiešām dzēst šo lietotāju?')">
-                        Dzēst
-                    </a>
+                <div class="user-wow-actions">
+                    <form th:action="@{/users/delete/{id}(id=${user.id})}"
+                          method="post"
+                          onsubmit="return confirm('Tiešām dzēst šo lietotāju?')">
+
+                        <button type="submit" class="small-btn red">
+                            Dzēst
+                        </button>
+
+                    </form>
                 </div>
 
             </div>
