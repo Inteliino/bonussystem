@@ -531,7 +531,7 @@
                         <td th:text="${record.treshaPakape == 0 ? '-' : #numbers.formatDecimal(record.treshaPakape,1,0)}"></td>
                         <td th:text="${record.ceturtaPakape == 0 ? '-' : #numbers.formatDecimal(record.ceturtaPakape,1,0)}"></td>
                         <td class="bonus-green" th:text="${#numbers.formatDecimal(record.bonus,1,2)} + ' €'"></td>
-                        <td th:if="${isAdmin}" class="nowrap">
+                        <td th:if="${isAdmin}" class="nowrap report-actions">
                             <a class="small-btn blue" th:href="@{/edit-record/{id}(id=${record.id})}">Labot</a>
                             <a class="small-btn red"
                                th:href="@{/delete-record/{id}(id=${record.id})}"
