@@ -27,8 +27,15 @@ public class ValmieraGlassImportService {
 
         try {
             Document document = Jsoup.connect(url)
-                    .timeout(15000)
+                    .userAgent("Mozilla/5.0")
+                    .referrer("https://webapp.valmiera-glass.com/")
+                    .ignoreHttpErrors(true)
+                    .ignoreContentType(true)
+                    .timeout(30000)
                     .get();
+
+            System.out.println("IMPORT STATUS: lapas virsraksts = " + document.title());
+            System.out.println("IMPORT ROW COUNT: " + document.select("tr").size());
 
             Elements rows = document.select("tr");
 
@@ -40,10 +47,14 @@ public class ValmieraGlassImportService {
                     continue;
                 }
 
-                String employeeName = cols.get(0).text().trim();
-                String tabelesNr = cols.get(1).text().trim();
+                String employeeName = cleanText(cols.get(0).text());
+                String tabelesNr = cleanText(cols.get(1).text());
 
                 if (employeeName.isBlank() || tabelesNr.isBlank()) {
+                    continue;
+                }
+
+                if (!looksLikeEmployee(employeeName, tabelesNr)) {
                     continue;
                 }
 
@@ -52,31 +63,82 @@ public class ValmieraGlassImportService {
                 record.setDate(LocalDate.now());
                 record.setWorkPeriod("Importēts");
                 record.setShiftName("Importēts");
+
                 record.setEmployeeName(employeeName);
                 record.setTabelesNr(tabelesNr);
 
-                record.setRoboti(0);
-                record.setCirsana(0);
+                record.setRoboti(readNumber(cols, 2));
+                record.setCirsana(readNumber(cols, 3));
                 record.setCirsanaPilnie(0);
                 record.setCirsanaNepilnie(0);
-                record.setPilnie(0);
-                record.setNepilnie(0);
-                record.setPirmaPakape(0);
-                record.setOtraPakape(0);
-                record.setTreshaPakape(0);
-                record.setCeturtaPakape(0);
+                record.setPilnie(readNumber(cols, 4));
+                record.setNepilnie(readNumber(cols, 5));
+                record.setPirmaPakape(readNumber(cols, 6));
+                record.setOtraPakape(readNumber(cols, 7));
+                record.setTreshaPakape(readNumber(cols, 8));
+                record.setCeturtaPakape(readNumber(cols, 9));
 
                 record.setStatus("PENDING");
                 record.setImportedAt(LocalDateTime.now());
+                record.setImportSource("VALMIERA_GLASS");
 
                 pendingRepository.save(record);
                 count++;
             }
 
+            System.out.println("IMPORT DONE: saglabāti ieraksti = " + count);
+            return count;
+
         } catch (Exception e) {
-            throw new RuntimeException("Neizdevās importēt datus: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Neizdevās importēt datus no Valmiera Glass: " + e.getMessage(), e);
+        }
+    }
+
+    private String cleanText(String text) {
+        if (text == null) {
+            return "";
         }
 
-        return count;
+        return text
+                .replace("\u00A0", " ")
+                .replace(",", ".")
+                .trim();
+    }
+
+    private double readNumber(Elements cols, int index) {
+        if (cols.size() <= index) {
+            return 0;
+        }
+
+        String text = cleanText(cols.get(index).text());
+
+        if (text.isBlank() || text.equals("-")) {
+            return 0;
+        }
+
+        text = text.replaceAll("[^0-9.]", "");
+
+        if (text.isBlank()) {
+            return 0;
+        }
+
+        try {
+            return Double.parseDouble(text);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private boolean looksLikeEmployee(String employeeName, String tabelesNr) {
+        if (employeeName.length() < 3) {
+            return false;
+        }
+
+        if (employeeName.toLowerCase().contains("darbinieks")) {
+            return false;
+        }
+
+        return tabelesNr.matches(".*\\d.*");
     }
 }
