@@ -316,7 +316,7 @@
         <div class="section-header">
             <div>
                 <h2>Maiņu salīdzinājums</h2>
-                <p>Maiņu izmaksu un vidējo rādītāju pārskats</p>
+                <p>Maiņu izmaksu, vidējo rādītāju un kopējo apjomu pārskats</p>
             </div>
         </div>
 
@@ -380,6 +380,54 @@
                         Nav datu
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="section-card" style="margin-top:25px;">
+            <h3>📦 Kopējie apjomi pa maiņām</h3>
+
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Maiņa</th>
+                        <th>Roboti</th>
+                        <th>Pilnie</th>
+                        <th>Nepilnie</th>
+                        <th>I pakāpe</th>
+                        <th>II pakāpe</th>
+                        <th>III pakāpe</th>
+                        <th>IV pakāpe</th>
+                        <th>Kopā</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="entry : ${shiftTotals}">
+                        <td class="nowrap" th:text="${entry.key}">1. maiņa</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.roboti,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.pilnie,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.nepilnie,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.pirmaPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.otraPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.treshaPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(entry.value.ceturtaPakape,1,0)}">0</td>
+                        <td class="bonus-green" th:text="${#numbers.formatDecimal(entry.value.kopa,1,0)}">0</td>
+                    </tr>
+
+                    <tr style="font-weight:900;">
+                        <td class="nowrap">KOPĀ</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.roboti,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.pilnie,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.nepilnie,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.pirmaPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.otraPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.treshaPakape,1,0)}">0</td>
+                        <td th:text="${#numbers.formatDecimal(grandTotal.ceturtaPakape,1,0)}">0</td>
+                        <td class="bonus-green" th:text="${#numbers.formatDecimal(grandTotal.kopa,1,0)}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>

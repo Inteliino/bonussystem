@@ -30,31 +30,20 @@
         </div>
     </div>
 
-    <div class="pending-top-stats">
-        <div class="pending-stat-box">
-            <span>⏳ Gaida</span>
-            <strong th:text="${pendingCount}">0</strong>
-        </div>
+   <div class="pending-top-stats">
 
-        <div class="pending-stat-box green">
-            <span>✅ Apstiprināšanai</span>
-            <strong>Aktīvi</strong>
-        </div>
-
-        <div class="pending-stat-box blue">
-            <span>🔎 Meklēšana</span>
-            <strong>Ātra</strong>
-        </div>
-
-        <div class="pending-stat-box orange">
-            <span>📋 Skats</span>
-            <strong>Kompakts</strong>
-        </div>
+    <div class="pending-stat-box">
+        <span>⏳ Gaida apstiprināšanu</span>
+        <strong th:text="${pendingCount}">0</strong>
     </div>
-<button type="button" class="btn primary" onclick="testBrowserImport()">
-    📥 Testēt Browser importu
-</button>
 
+</div>
+
+<button type="button"
+        class="btn primary"
+        onclick="testBrowserImport()">
+    📥 Importēt no Valmiera Glass
+</button>
     <div class="pending-filter-card">
         <form method="get" action="/pending-records" class="pending-filter-grid">
 
@@ -91,11 +80,11 @@
 
     <div class="section-card pending-section">
         <div class="section-header">
-            <div>
-                <h2>Importētie ieraksti</h2>
-                <p>Lielāks un pārskatāmāks skats bez liekas tukšās vietas.</p>
-            </div>
-        </div>
+    <div>
+        <h2>Importētie ieraksti</h2>
+        <p>Ieraksti, kuri gaida apstiprināšanu pirms nonāk statistikā.</p>
+    </div>
+</div>
 
         <div th:if="${#lists.size(records) == 0}" class="empty-report">
             Nav ierakstu pēc izvēlētajiem filtriem.

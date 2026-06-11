@@ -40,6 +40,7 @@ public class HomeController {
         this.bonusCalculatorService = bonusCalculatorService;
         this.recordAuditLogService = recordAuditLogService;
     }
+
     @GetMapping("/approve-record/{id}")
     public String approveRecord(@PathVariable Long id, HttpSession session) {
 
@@ -201,6 +202,21 @@ public class HomeController {
             );
         }
 
+        Map<String, ShiftTotals> shiftTotals = new LinkedHashMap<>();
+
+        for (String shift : shifts) {
+            ShiftTotals totals = new ShiftTotals();
+
+            shiftCompareRecords.stream()
+                    .filter(r -> shift.equals(r.getShiftName()))
+                    .forEach(totals::addRecord);
+
+            shiftTotals.put(shift, totals);
+        }
+
+        ShiftTotals grandTotal = new ShiftTotals();
+        shiftCompareRecords.forEach(grandTotal::addRecord);
+
         Map<String, PositionBonusStats> positionBonusStats = createPositionBonusStats(shiftCompareRecords, shifts);
 
         List<PositionBonusStats> positionBonusRanking = positionBonusStats.values()
@@ -311,6 +327,8 @@ public class HomeController {
 
         model.addAttribute("shiftSummary", shiftSummary);
         model.addAttribute("shiftStats", shiftStats);
+        model.addAttribute("shiftTotals", shiftTotals);
+        model.addAttribute("grandTotal", grandTotal);
 
         model.addAttribute("positionBonusStats", positionBonusStats);
         model.addAttribute("positionBonusRanking", positionBonusRanking);
@@ -622,6 +640,68 @@ public class HomeController {
 
         public double getBonus() {
             return bonus;
+        }
+    }
+
+    public static class ShiftTotals {
+
+        private double roboti;
+        private double pilnie;
+        private double nepilnie;
+
+        private double pirmaPakape;
+        private double otraPakape;
+        private double treshaPakape;
+        private double ceturtaPakape;
+
+        public void addRecord(WorkRecord r) {
+            roboti += r.getRoboti();
+
+            pilnie += r.getPilnie() + r.getCirsanaPilnie();
+            nepilnie += r.getNepilnie() + r.getCirsanaNepilnie();
+
+            pirmaPakape += r.getPirmaPakape();
+            otraPakape += r.getOtraPakape();
+            treshaPakape += r.getTreshaPakape();
+            ceturtaPakape += r.getCeturtaPakape();
+        }
+
+        public double getRoboti() {
+            return roboti;
+        }
+
+        public double getPilnie() {
+            return pilnie;
+        }
+
+        public double getNepilnie() {
+            return nepilnie;
+        }
+
+        public double getPirmaPakape() {
+            return pirmaPakape;
+        }
+
+        public double getOtraPakape() {
+            return otraPakape;
+        }
+
+        public double getTreshaPakape() {
+            return treshaPakape;
+        }
+
+        public double getCeturtaPakape() {
+            return ceturtaPakape;
+        }
+
+        public double getKopa() {
+            return roboti
+                    + pilnie
+                    + nepilnie
+                    + pirmaPakape
+                    + otraPakape
+                    + treshaPakape
+                    + ceturtaPakape;
         }
     }
 
