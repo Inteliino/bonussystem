@@ -97,7 +97,13 @@ public class PendingRecordsController {
 
     @PostMapping("/pending-records/import-valmiera")
     public String importFromValmieraGlass() {
-        valmieraGlassImportService.importFromValmieraGlass();
+        try {
+            valmieraGlassImportService.importFromValmieraGlass();
+        } catch (Exception e) {
+            System.out.println("IMPORT ERROR:");
+            e.printStackTrace();
+        }
+
         return "redirect:/pending-records";
     }
 
