@@ -31,6 +31,7 @@ public class PendingRecordsController {
     private final EmployeeRepository employeeRepository;
     private final BonusCalculatorService bonusCalculatorService;
     private final ValmieraGlassImportService valmieraGlassImportService;
+    
 
     public PendingRecordsController(PendingWorkRecordRepository pendingRepository,
                                     WorkRecordRepository workRecordRepository,
