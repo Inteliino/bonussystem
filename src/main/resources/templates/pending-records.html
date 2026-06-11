@@ -51,11 +51,9 @@
             <strong>Kompakts</strong>
         </div>
     </div>
-<form action="/pending-records/import-valmiera" method="post" style="display:inline;">
-    <button type="submit" class="btn primary">
-        Importēt no Valmiera Glass
-    </button>
-</form>
+<button type="button" class="btn primary" onclick="testBrowserImport()">
+    📥 Testēt Browser importu
+</button>
 
     <div class="pending-filter-card">
         <form method="get" action="/pending-records" class="pending-filter-grid">
@@ -230,6 +228,30 @@
         });
     }
 </script>
+<script>
+async function testBrowserImport() {
 
+    try {
+
+        const response = await fetch(
+            "https://webapp.valmiera-glass.com/krasns/endfindingRacksWorkers.php"
+        );
+
+        const html = await response.text();
+
+        console.log("=== VALMIERA GLASS HTML ===");
+        console.log(html);
+
+        alert("Lapa nolasīta. Atver F12 -> Console");
+
+    } catch (error) {
+
+        console.error("BROWSER IMPORT ERROR:");
+        console.error(error);
+
+        alert("Kļūda. Atver F12 -> Console");
+    }
+}
+</script>
 </body>
 </html>
