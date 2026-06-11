@@ -38,6 +38,7 @@ public class EmployeeController {
     @PostMapping("/employees/add")
     public String addEmployee(@RequestParam String name,
                               @RequestParam String tabelesNr,
+                              @RequestParam(required = false) String defaultShiftName,
                               HttpSession session) {
 
         if (!isAdmin(session)) {
@@ -51,6 +52,7 @@ public class EmployeeController {
         Employee employee = new Employee();
         employee.setName(name);
         employee.setTabelesNr(tabelesNr);
+        employee.setDefaultShiftName(defaultShiftName);
         employee.setActive(true);
 
         employeeRepository.save(employee);
@@ -62,6 +64,7 @@ public class EmployeeController {
     public String editEmployee(@PathVariable Long id,
                                @RequestParam String name,
                                @RequestParam String tabelesNr,
+                               @RequestParam(required = false) String defaultShiftName,
                                HttpSession session) {
 
         if (!isAdmin(session)) {
@@ -76,6 +79,7 @@ public class EmployeeController {
 
         employee.setName(name);
         employee.setTabelesNr(tabelesNr);
+        employee.setDefaultShiftName(defaultShiftName);
 
         employeeRepository.save(employee);
 

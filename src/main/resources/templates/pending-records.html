@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="lv" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Neapstiprinātie ieraksti</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container compact-container">
+
+    <div class="pending-hero pending-hero-wow">
+        <div>
+            <div class="pending-icon">⏳</div>
+            <h1>Neapstiprinātie uzdevumi</h1>
+            <p>Šie ieraksti vēl nav apstiprināti un neiet statistikā.</p>
+        </div>
+
+        <div class="pending-hero-right">
+            <div class="pending-big-count">
+                <strong th:text="${pendingCount}">0</strong>
+                <span>gaida</span>
+            </div>
+
+            <div class="menu-buttons">
+                <a class="btn ghost" th:href="@{/}">Atpakaļ</a>
+                <a class="btn ghost danger" th:href="@{/logout}">Iziet</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="pending-top-stats">
+        <div class="pending-stat-box">
+            <span>⏳ Gaida</span>
+            <strong th:text="${pendingCount}">0</strong>
+        </div>
+
+        <div class="pending-stat-box green">
+            <span>✅ Apstiprināšanai</span>
+            <strong>Aktīvi</strong>
+        </div>
+
+        <div class="pending-stat-box blue">
+            <span>🔎 Meklēšana</span>
+            <strong>Ātra</strong>
+        </div>
+
+        <div class="pending-stat-box orange">
+            <span>📋 Skats</span>
+            <strong>Kompakts</strong>
+        </div>
+    </div>
+<form action="/pending-records/import-valmiera" method="post" style="display:inline;">
+    <button type="submit" class="btn primary">
+        Importēt no Valmiera Glass
+    </button>
+</form>
+
+    <div class="pending-filter-card">
+        <form method="get" action="/pending-records" class="pending-filter-grid">
+
+            <select name="status">
+                <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Tikai gaida</option>
+                <option value="APPROVED" th:selected="${selectedStatus == 'APPROVED'}">Apstiprinātie</option>
+                <option value="ALL" th:selected="${selectedStatus == 'ALL'}">Visi statusi</option>
+            </select>
+
+            <select name="shiftName">
+                <option value="ALL" th:selected="${selectedShiftName == 'ALL'}">Visas ieraksta maiņas</option>
+                <option value="1. maiņa" th:selected="${selectedShiftName == '1. maiņa'}">1. maiņa</option>
+                <option value="2. maiņa" th:selected="${selectedShiftName == '2. maiņa'}">2. maiņa</option>
+                <option value="3. maiņa" th:selected="${selectedShiftName == '3. maiņa'}">3. maiņa</option>
+                <option value="4. maiņa" th:selected="${selectedShiftName == '4. maiņa'}">4. maiņa</option>
+            </select>
+
+            <select name="defaultShiftName">
+                <option value="ALL" th:selected="${selectedDefaultShiftName == 'ALL'}">Visas noklusējuma maiņas</option>
+                <option value="1. maiņa" th:selected="${selectedDefaultShiftName == '1. maiņa'}">Darbinieki no 1. maiņas</option>
+                <option value="2. maiņa" th:selected="${selectedDefaultShiftName == '2. maiņa'}">Darbinieki no 2. maiņas</option>
+                <option value="3. maiņa" th:selected="${selectedDefaultShiftName == '3. maiņa'}">Darbinieki no 3. maiņas</option>
+                <option value="4. maiņa" th:selected="${selectedDefaultShiftName == '4. maiņa'}">Darbinieki no 4. maiņas</option>
+            </select>
+
+            <button type="submit" class="btn primary">Filtrēt</button>
+        </form>
+
+        <input type="text"
+               id="pendingSearch"
+               class="pending-search"
+               placeholder="🔎 Meklēt pēc darbinieka, tabeles nr., datuma vai maiņas...">
+    </div>
+
+    <div class="section-card pending-section">
+        <div class="section-header">
+            <div>
+                <h2>Importētie ieraksti</h2>
+                <p>Lielāks un pārskatāmāks skats bez liekas tukšās vietas.</p>
+            </div>
+        </div>
+
+        <div th:if="${#lists.size(records) == 0}" class="empty-report">
+            Nav ierakstu pēc izvēlētajiem filtriem.
+        </div>
+
+        <div class="pending-wow-list" th:if="${#lists.size(records) > 0}">
+
+            <div class="pending-wow-row" th:each="record : ${records}">
+
+                <div class="pending-person-block">
+                    <div class="pending-person-avatar">
+                        <span th:text="${#strings.substring(record.employeeName,0,1)}">D</span>
+                    </div>
+
+                    <div>
+                        <h3 th:text="${record.employeeName}">Darbinieks</h3>
+                        <p th:text="'Tabeles Nr: ' + ${record.tabelesNr}">Tabeles Nr: 0000</p>
+                    </div>
+                </div>
+
+                <div class="pending-date-block">
+                    <strong th:text="${record.date}">2026-06-04</strong>
+                    <span th:text="${record.shiftName}">2. maiņa</span>
+                    <small th:text="${record.workPeriod}">06:00-18:00</small>
+                </div>
+
+                <div class="pending-values-wow">
+
+                    <div class="pending-value-card robot" th:if="${record.roboti > 0}">
+                        <span>🤖 Roboti</span>
+                        <strong th:text="${#numbers.formatDecimal(record.roboti,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card cut" th:if="${record.cirsana > 0}">
+                        <span>✂️ Ciršana</span>
+                        <strong th:text="${#numbers.formatDecimal(record.cirsana,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card full" th:if="${record.cirsanaPilnie > 0}">
+                        <span>📦 C. pilnie</span>
+                        <strong th:text="${#numbers.formatDecimal(record.cirsanaPilnie,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card partial" th:if="${record.cirsanaNepilnie > 0}">
+                        <span>💎 C. nepilnie</span>
+                        <strong th:text="${#numbers.formatDecimal(record.cirsanaNepilnie,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card full" th:if="${record.pilnie > 0}">
+                        <span>📦 Pilnie</span>
+                        <strong th:text="${#numbers.formatDecimal(record.pilnie,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card partial" th:if="${record.nepilnie > 0}">
+                        <span>💎 Nepilnie</span>
+                        <strong th:text="${#numbers.formatDecimal(record.nepilnie,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card grade" th:if="${record.pirmaPakape > 0}">
+                        <span>I pakāpe</span>
+                        <strong th:text="${#numbers.formatDecimal(record.pirmaPakape,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card grade" th:if="${record.otraPakape > 0}">
+                        <span>II pakāpe</span>
+                        <strong th:text="${#numbers.formatDecimal(record.otraPakape,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card grade" th:if="${record.treshaPakape > 0}">
+                        <span>III pakāpe</span>
+                        <strong th:text="${#numbers.formatDecimal(record.treshaPakape,1,0)}">0</strong>
+                    </div>
+
+                    <div class="pending-value-card grade" th:if="${record.ceturtaPakape > 0}">
+                        <span>IV pakāpe</span>
+                        <strong th:text="${#numbers.formatDecimal(record.ceturtaPakape,1,0)}">0</strong>
+                    </div>
+
+                </div>
+
+                <div class="pending-money-block">
+                    <strong th:text="${#numbers.formatDecimal(record.bonus,1,2)} + ' €'">0,00 €</strong>
+
+                    <span class="pending-status" th:if="${record.status == 'PENDING'}">Gaida</span>
+                    <span class="status active" th:if="${record.status == 'APPROVED'}">Apstiprināts</span>
+                    <span class="status inactive"
+                          th:if="${record.status != 'PENDING' and record.status != 'APPROVED'}"
+                          th:text="${record.status}">Statuss</span>
+                </div>
+
+                <div class="pending-actions pending-actions-wow">
+                    <a class="small-btn green"
+                       th:if="${record.status == 'PENDING'}"
+                       th:href="@{/pending-records/approve/{id}(id=${record.id})}"
+                       onclick="return confirm('Apstiprināt šo ierakstu?')">
+                        Apstiprināt
+                    </a>
+
+                    <a class="small-btn blue"
+                       th:href="@{/pending-records/edit/{id}(id=${record.id})}">
+                        Labot
+                    </a>
+
+                    <a class="small-btn red"
+                       th:href="@{/pending-records/delete/{id}(id=${record.id})}"
+                       onclick="return confirm('Tiešām dzēst šo ierakstu?')">
+                        Dzēst
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const pendingSearch = document.getElementById("pendingSearch");
+
+    if (pendingSearch) {
+        pendingSearch.addEventListener("keyup", function () {
+            const value = this.value.toLowerCase();
+            const rows = document.querySelectorAll(".pending-wow-row");
+
+            rows.forEach(function (row) {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(value) ? "" : "grid";
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

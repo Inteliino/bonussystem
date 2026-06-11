@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.Method;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,6 +39,27 @@ public class HomeController {
         this.assortmentRepository = assortmentRepository;
         this.bonusCalculatorService = bonusCalculatorService;
         this.recordAuditLogService = recordAuditLogService;
+    }
+    @GetMapping("/approve-record/{id}")
+    public String approveRecord(@PathVariable Long id, HttpSession session) {
+
+        if (!isAdmin(session)) {
+            return "redirect:/";
+        }
+
+        WorkRecord record = workRecordRepository.findById(id).orElse(null);
+
+        if (record == null) {
+            return "redirect:/#pendingTasks";
+        }
+
+        record.setApproved(true);
+        record.setApprovedAt(LocalDateTime.now());
+        record.setApprovedBy(getUsername(session));
+
+        workRecordRepository.save(record);
+
+        return "redirect:/#pendingTasks";
     }
 
     @GetMapping("/")
@@ -74,7 +96,8 @@ public class HomeController {
             years.add(y);
         }
 
-        List<WorkRecord> allRecords = workRecordRepository.findAll();
+        List<WorkRecord> pendingRecords = workRecordRepository.findByApprovedFalseOrderByDateDesc();
+        List<WorkRecord> allRecords = workRecordRepository.findByApprovedTrueOrderByDateDesc();
         List<WorkRecord> records = new ArrayList<>(allRecords);
 
         if (shiftName == null || shiftName.isBlank()) {
@@ -274,6 +297,8 @@ public class HomeController {
         model.addAttribute("employees", employeeRepository.findByActiveTrueOrderByNameAsc());
         model.addAttribute("assortments", assortmentRepository.findByActiveTrue());
         model.addAttribute("records", records);
+        model.addAttribute("pendingRecords", pendingRecords);
+        model.addAttribute("pendingCount", pendingRecords.size());
 
         model.addAttribute("isAdmin", isAdmin);
         model.addAttribute("todayDate", today.toString());
@@ -411,6 +436,10 @@ public class HomeController {
                 }
             }
         }
+
+        record.setApproved(false);
+        record.setApprovedBy(null);
+        record.setApprovedAt(null);
 
         bonusCalculatorService.calculateBonus(record);
         workRecordRepository.save(record);

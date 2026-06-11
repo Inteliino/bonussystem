@@ -8,13 +8,13 @@
 
 <body>
 
-<div class="container">
+<div class="container employees-page">
 
-    <div class="employees-hero">
+    <div class="employees-hero compact-employee-hero">
         <div>
             <div class="employees-icon">👥</div>
             <h1>Darbinieki</h1>
-            <p>Pievieno, labo un pārvaldi darbinieku statusu</p>
+            <p>Pārvaldi darbiniekus, maiņas un statusus vienā pārskatāmā skatā</p>
         </div>
 
         <div class="employees-hero-actions">
@@ -33,116 +33,231 @@
     <div class="alert error" th:if="${error == 'hasRecords'}">Darbinieku nevar dzēst, jo viņam ir darba ieraksti. Izmanto “Neaktīvs”.</div>
     <div class="alert error" th:if="${error == 'onlyAdmin'}">Šo darbību drīkst veikt tikai admin lietotājs.</div>
 
-    <div class="employee-wow-add">
-        <div>
-            <h2>➕ Pievienot darbinieku</h2>
-            <p>Ievadi darbinieka vārdu un tabeles numuru</p>
+    <div class="employee-stats-row">
+        <div class="employee-stat-card">
+            <span>Kopā</span>
+            <strong th:text="${#lists.size(employees)}">0</strong>
+            <p>darbinieki</p>
         </div>
 
-        <form method="post" action="/employees/add" class="employee-wow-form">
+        <div class="employee-stat-card blue">
+            <span>Aktīvie</span>
+            <strong id="activeCount">0</strong>
+            <p>sistēmā</p>
+        </div>
+
+        <div class="employee-stat-card orange">
+            <span>Neaktīvie</span>
+            <strong id="inactiveCount">0</strong>
+            <p>paslēpti darbam</p>
+        </div>
+
+        <div class="employee-stat-card purple">
+            <span>Skatā redzami</span>
+            <strong id="visibleCount">0</strong>
+            <p>pēc filtra</p>
+        </div>
+    </div>
+
+    <div class="employee-wow-add employee-compact-add">
+        <div>
+            <h2>➕ Pievienot darbinieku</h2>
+            <p>Ātrā pievienošana vienā rindā</p>
+        </div>
+
+        <form method="post" action="/employees/add" class="employee-add-line">
             <input type="text" name="name" placeholder="Vārds Uzvārds" required>
             <input type="text" name="tabelesNr" placeholder="Tabeles Nr" required>
+
+            <select name="defaultShiftName">
+                <option value="">Noklusējuma maiņa</option>
+                <option value="1. maiņa">1. maiņa</option>
+                <option value="2. maiņa">2. maiņa</option>
+                <option value="3. maiņa">3. maiņa</option>
+                <option value="4. maiņa">4. maiņa</option>
+            </select>
+
             <button type="submit" class="btn primary">Pievienot</button>
         </form>
     </div>
 
-    <div class="employee-wow-list">
+    <div class="employee-wow-list employee-table-card">
 
-        <div class="employee-list-top">
+        <div class="employee-list-top compact-list-top">
             <div>
                 <h2>Darbinieku saraksts</h2>
-                <p>Neaktīvie paliek datubāzē, bet netiks izmantoti kā aktīvie darbinieki.</p>
-            </div>
-
-            <div class="employee-count-card">
-                <span>Kopā</span>
-                <strong th:text="${#lists.size(employees)}">0</strong>
-                <p>darbinieki</p>
+                <p>Kompakts HR skats — viens darbinieks vienā rindā.</p>
             </div>
         </div>
 
-        <input type="text"
-               id="searchEmployee"
-               class="employee-wow-search"
-               placeholder="🔎 Meklēt pēc vārda vai tabeles numura...">
+        <div class="employee-filter-bar">
+            <input type="text"
+                   id="searchEmployee"
+                   placeholder="🔎 Meklēt pēc vārda, tabeles numura vai maiņas...">
 
-        <div class="employee-cards">
+            <select id="shiftFilter">
+                <option value="">Visas maiņas</option>
+                <option value="1. maiņa">1. maiņa</option>
+                <option value="2. maiņa">2. maiņa</option>
+                <option value="3. maiņa">3. maiņa</option>
+                <option value="4. maiņa">4. maiņa</option>
+                <option value="Nav norādīta">Nav norādīta</option>
+            </select>
 
-            <div class="employee-row-card"
-                 th:each="employee : ${employees}"
-                 th:classappend="${!employee.active} ? ' inactive-row' : ''">
-
-                <form th:action="@{/employees/edit/{id}(id=${employee.id})}"
-                      method="post"
-                      th:id="'editForm' + ${employee.id}">
-                </form>
-
-                <div class="employee-person">
-                    <div class="employee-avatar">👤</div>
-                    <input type="text"
-                           name="name"
-                           th:value="${employee.name}"
-                           th:form="'editForm' + ${employee.id}"
-                           required>
-                </div>
-
-                <div class="employee-number">
-                    <label>Tabeles Nr</label>
-                    <input type="text"
-                           name="tabelesNr"
-                           th:value="${employee.tabelesNr}"
-                           th:form="'editForm' + ${employee.id}"
-                           required>
-                </div>
-
-                <div class="employee-status-box">
-                    <span class="status active" th:if="${employee.active}">Aktīvs</span>
-                    <span class="status inactive" th:if="${!employee.active}">Neaktīvs</span>
-                </div>
-
-                <div class="employee-wow-actions">
-                    <button type="submit"
-                            class="small-btn blue"
-                            th:form="'editForm' + ${employee.id}">
-                        Saglabāt
-                    </button>
-
-                    <form th:action="@{/employees/toggle-active/{id}(id=${employee.id})}"
-                          method="post">
-                        <button type="submit"
-                                class="small-btn orange"
-                                th:text="${employee.active} ? 'Padarīt neaktīvu' : 'Padarīt aktīvu'">
-                        </button>
-                    </form>
-
-                    <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
-                       class="small-btn red"
-                       onclick="return confirm('Dzēst drīkst tikai tad, ja darbiniekam nav darba ierakstu. Labāk izmanto Neaktīvs. Turpināt?')">
-                        Dzēst
-                    </a>
-                </div>
-
-            </div>
-
+            <select id="statusFilter">
+                <option value="">Visi statusi</option>
+                <option value="Aktīvs">Aktīvs</option>
+                <option value="Neaktīvs">Neaktīvs</option>
+            </select>
         </div>
+
+        <div class="employee-table-wrapper">
+            <table class="employee-wow-table">
+                <thead>
+                <tr>
+                    <th>Darbinieks</th>
+                    <th>Tabeles Nr</th>
+                    <th>Noklusējuma maiņa</th>
+                    <th>Statuss</th>
+                    <th>Darbības</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr class="employee-table-row"
+                    th:each="employee : ${employees}"
+                    th:classappend="${!employee.active} ? ' inactive-row' : ''"
+                    th:data-status="${employee.active} ? 'Aktīvs' : 'Neaktīvs'"
+                    th:data-shift="${employee.defaultShiftName != null && employee.defaultShiftName != '' ? employee.defaultShiftName : 'Nav norādīta'}">
+
+                    <td>
+                        <form th:action="@{/employees/edit/{id}(id=${employee.id})}"
+                              method="post"
+                              th:id="'editForm' + ${employee.id}">
+                        </form>
+
+                        <div class="employee-name-cell">
+                            <div class="employee-small-avatar">👤</div>
+                            <input type="text"
+                                   name="name"
+                                   th:value="${employee.name}"
+                                   th:form="'editForm' + ${employee.id}"
+                                   required>
+                        </div>
+                    </td>
+
+                    <td>
+                        <input type="text"
+                               name="tabelesNr"
+                               th:value="${employee.tabelesNr}"
+                               th:form="'editForm' + ${employee.id}"
+                               required>
+                    </td>
+
+                    <td>
+                        <select name="defaultShiftName"
+                                th:form="'editForm' + ${employee.id}">
+                            <option value="">Nav norādīta</option>
+                            <option value="1. maiņa" th:selected="${employee.defaultShiftName == '1. maiņa'}">1. maiņa</option>
+                            <option value="2. maiņa" th:selected="${employee.defaultShiftName == '2. maiņa'}">2. maiņa</option>
+                            <option value="3. maiņa" th:selected="${employee.defaultShiftName == '3. maiņa'}">3. maiņa</option>
+                            <option value="4. maiņa" th:selected="${employee.defaultShiftName == '4. maiņa'}">4. maiņa</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <span class="status active" th:if="${employee.active}">Aktīvs</span>
+                        <span class="status inactive" th:if="${!employee.active}">Neaktīvs</span>
+                    </td>
+
+                    <td>
+                        <div class="employee-action-line">
+                            <button type="submit"
+                                    class="small-btn blue"
+                                    th:form="'editForm' + ${employee.id}">
+                                Saglabāt
+                            </button>
+
+                            <form th:action="@{/employees/toggle-active/{id}(id=${employee.id})}"
+                                  method="post">
+                                <button type="submit"
+                                        class="small-btn orange"
+                                        th:text="${employee.active} ? 'Neaktīvs' : 'Aktīvs'">
+                                </button>
+                            </form>
+
+                            <a th:href="@{/employees/delete/{id}(id=${employee.id})}"
+                               class="small-btn red"
+                               onclick="return confirm('Dzēst drīkst tikai tad, ja darbiniekam nav darba ierakstu. Labāk izmanto Neaktīvs. Turpināt?')">
+                                Dzēst
+                            </a>
+                        </div>
+                    </td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
     </div>
 
 </div>
 
 <script>
     const searchInput = document.getElementById("searchEmployee");
+    const shiftFilter = document.getElementById("shiftFilter");
+    const statusFilter = document.getElementById("statusFilter");
 
-    if (searchInput) {
-        searchInput.addEventListener("keyup", function () {
-            const value = this.value.toLowerCase();
-            const rows = document.querySelectorAll(".employee-row-card");
+    const rows = document.querySelectorAll(".employee-table-row");
 
-            rows.forEach(function (row) {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(value) ? "" : "none";
-            });
+    const activeCount = document.getElementById("activeCount");
+    const inactiveCount = document.getElementById("inactiveCount");
+    const visibleCount = document.getElementById("visibleCount");
+
+    function updateCounts() {
+        let active = 0;
+        let inactive = 0;
+        let visible = 0;
+
+        rows.forEach(row => {
+            const status = row.dataset.status;
+
+            if (status === "Aktīvs") active++;
+            if (status === "Neaktīvs") inactive++;
+
+            if (row.style.display !== "none") visible++;
         });
+
+        activeCount.textContent = active;
+        inactiveCount.textContent = inactive;
+        visibleCount.textContent = visible;
     }
+
+    function filterEmployees() {
+        const searchValue = searchInput.value.toLowerCase();
+        const shiftValue = shiftFilter.value;
+        const statusValue = statusFilter.value;
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const rowShift = row.dataset.shift;
+            const rowStatus = row.dataset.status;
+
+            const matchesSearch = text.includes(searchValue);
+            const matchesShift = shiftValue === "" || rowShift === shiftValue;
+            const matchesStatus = statusValue === "" || rowStatus === statusValue;
+
+            row.style.display = matchesSearch && matchesShift && matchesStatus ? "" : "none";
+        });
+
+        updateCounts();
+    }
+
+    searchInput.addEventListener("keyup", filterEmployees);
+    shiftFilter.addEventListener("change", filterEmployees);
+    statusFilter.addEventListener("change", filterEmployees);
+
+    updateCounts();
 </script>
 
 </body>

@@ -204,22 +204,47 @@
 
             <input type="text" name="name" placeholder="Sortimenta nosaukums" required>
 
-            <select name="type" required>
-                <option value="">Izvēlies tipu</option>
-                <option value="ROBOTS">Robots</option>
-                <option value="CIRSANA">Cērtamie</option>
-                <option value="PILNIE">Pilnie</option>
-                <option value="NEPILNIE">Nepilnie</option>
-            </select>
+<select name="type" required>
+    <option value="">Izvēlies tipu</option>
 
-            <select name="gradeName">
-                <option value="">Pakāpe tikai nepilnajiem</option>
-                <option value="Nepilnie">Nepilnie</option>
-                <option value="I">I pakāpe</option>
-                <option value="II">II pakāpe</option>
-                <option value="III">III pakāpe</option>
-                <option value="IV">IV pakāpe</option>
-            </select>
+    <option value="ROBOTS">
+        Robots
+    </option>
+
+    <option value="PILNIE">
+        Pilnie
+    </option>
+
+    <option value="NEPILNIE">
+        Nepilnie
+    </option>
+
+    <option value="CIRSANA">
+        Ciršana
+    </option>
+</select>
+
+<select name="gradeName">
+    <option value="">
+        Bez pakāpes
+    </option>
+
+    <option value="I">
+        I pakāpe
+    </option>
+
+    <option value="II">
+        II pakāpe
+    </option>
+
+    <option value="III">
+        III pakāpe
+    </option>
+
+    <option value="IV">
+        IV pakāpe
+    </option>
+</select>
 
             <button type="submit" class="btn primary">Pievienot sortimentu</button>
         </form>

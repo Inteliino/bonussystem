@@ -12,6 +12,8 @@ public class Employee {
     private String name;
     private String tabelesNr;
 
+    private String defaultShiftName;
+
     private boolean active = true;
 
     public Long getId() {
@@ -24,6 +26,10 @@ public class Employee {
 
     public String getTabelesNr() {
         return tabelesNr;
+    }
+
+    public String getDefaultShiftName() {
+        return defaultShiftName;
     }
 
     public boolean isActive() {
@@ -40,6 +46,10 @@ public class Employee {
 
     public void setTabelesNr(String tabelesNr) {
         this.tabelesNr = tabelesNr;
+    }
+
+    public void setDefaultShiftName(String defaultShiftName) {
+        this.defaultShiftName = defaultShiftName;
     }
 
     public void setActive(boolean active) {

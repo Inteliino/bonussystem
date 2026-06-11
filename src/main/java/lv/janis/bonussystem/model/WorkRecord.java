@@ -2,6 +2,7 @@ package lv.janis.bonussystem.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 public class WorkRecord {
@@ -18,64 +19,176 @@ public class WorkRecord {
     private double cirsana;
     private double cirsanaPilnie;
     private double cirsanaNepilnie;
-
     private double pilnie;
-
-    // Parastie nepilnie, koeficients 1.0
     private double nepilnie;
-
     private double pirmaPakape;
     private double otraPakape;
     private double treshaPakape;
     private double ceturtaPakape;
 
-    private double realRati;
     private double bonus;
+    private double realRati;
+
+    private boolean approved = false;
+    private String approvedBy;
+    private LocalDateTime approvedAt;
 
     @ManyToOne
     private Employee employee;
 
-    public Long getId() { return id; }
-    public LocalDate getDate() { return date; }
-    public String getShiftName() { return shiftName; }
-    public String getTabelesNr() { return tabelesNr; }
+    public Long getId() {
+        return id;
+    }
 
-    public double getRoboti() { return roboti; }
-    public double getCirsana() { return cirsana; }
-    public double getCirsanaPilnie() { return cirsanaPilnie; }
-    public double getCirsanaNepilnie() { return cirsanaNepilnie; }
+    public LocalDate getDate() {
+        return date;
+    }
 
-    public double getPilnie() { return pilnie; }
-    public double getNepilnie() { return nepilnie; }
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-    public double getPirmaPakape() { return pirmaPakape; }
-    public double getOtraPakape() { return otraPakape; }
-    public double getTreshaPakape() { return treshaPakape; }
-    public double getCeturtaPakape() { return ceturtaPakape; }
+    public String getShiftName() {
+        return shiftName;
+    }
 
-    public double getRealRati() { return realRati; }
-    public double getBonus() { return bonus; }
-    public Employee getEmployee() { return employee; }
+    public void setShiftName(String shiftName) {
+        this.shiftName = shiftName;
+    }
 
-    public void setId(Long id) { this.id = id; }
-    public void setDate(LocalDate date) { this.date = date; }
-    public void setShiftName(String shiftName) { this.shiftName = shiftName; }
-    public void setTabelesNr(String tabelesNr) { this.tabelesNr = tabelesNr; }
+    public String getTabelesNr() {
+        return tabelesNr;
+    }
 
-    public void setRoboti(double roboti) { this.roboti = roboti; }
-    public void setCirsana(double cirsana) { this.cirsana = cirsana; }
-    public void setCirsanaPilnie(double cirsanaPilnie) { this.cirsanaPilnie = cirsanaPilnie; }
-    public void setCirsanaNepilnie(double cirsanaNepilnie) { this.cirsanaNepilnie = cirsanaNepilnie; }
+    public void setTabelesNr(String tabelesNr) {
+        this.tabelesNr = tabelesNr;
+    }
 
-    public void setPilnie(double pilnie) { this.pilnie = pilnie; }
-    public void setNepilnie(double nepilnie) { this.nepilnie = nepilnie; }
+    public double getRoboti() {
+        return roboti;
+    }
 
-    public void setPirmaPakape(double pirmaPakape) { this.pirmaPakape = pirmaPakape; }
-    public void setOtraPakape(double otraPakape) { this.otraPakape = otraPakape; }
-    public void setTreshaPakape(double treshaPakape) { this.treshaPakape = treshaPakape; }
-    public void setCeturtaPakape(double ceturtaPakape) { this.ceturtaPakape = ceturtaPakape; }
+    public void setRoboti(double roboti) {
+        this.roboti = roboti;
+    }
 
-    public void setRealRati(double realRati) { this.realRati = realRati; }
-    public void setBonus(double bonus) { this.bonus = bonus; }
-    public void setEmployee(Employee employee) { this.employee = employee; }
+    public double getCirsana() {
+        return cirsana;
+    }
+
+    public void setCirsana(double cirsana) {
+        this.cirsana = cirsana;
+    }
+
+    public double getCirsanaPilnie() {
+        return cirsanaPilnie;
+    }
+
+    public void setCirsanaPilnie(double cirsanaPilnie) {
+        this.cirsanaPilnie = cirsanaPilnie;
+    }
+
+    public double getCirsanaNepilnie() {
+        return cirsanaNepilnie;
+    }
+
+    public void setCirsanaNepilnie(double cirsanaNepilnie) {
+        this.cirsanaNepilnie = cirsanaNepilnie;
+    }
+
+    public double getPilnie() {
+        return pilnie;
+    }
+
+    public void setPilnie(double pilnie) {
+        this.pilnie = pilnie;
+    }
+
+    public double getNepilnie() {
+        return nepilnie;
+    }
+
+    public void setNepilnie(double nepilnie) {
+        this.nepilnie = nepilnie;
+    }
+
+    public double getPirmaPakape() {
+        return pirmaPakape;
+    }
+
+    public void setPirmaPakape(double pirmaPakape) {
+        this.pirmaPakape = pirmaPakape;
+    }
+
+    public double getOtraPakape() {
+        return otraPakape;
+    }
+
+    public void setOtraPakape(double otraPakape) {
+        this.otraPakape = otraPakape;
+    }
+
+    public double getTreshaPakape() {
+        return treshaPakape;
+    }
+
+    public void setTreshaPakape(double treshaPakape) {
+        this.treshaPakape = treshaPakape;
+    }
+
+    public double getCeturtaPakape() {
+        return ceturtaPakape;
+    }
+
+    public void setCeturtaPakape(double ceturtaPakape) {
+        this.ceturtaPakape = ceturtaPakape;
+    }
+
+    public double getBonus() {
+        return bonus;
+    }
+
+    public void setBonus(double bonus) {
+        this.bonus = bonus;
+    }
+
+    public double getRealRati() {
+        return realRati;
+    }
+
+    public void setRealRati(double realRati) {
+        this.realRati = realRati;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    public String getApprovedBy() {
+        return approvedBy;
+    }
+
+    public void setApprovedBy(String approvedBy) {
+        this.approvedBy = approvedBy;
+    }
+
+    public LocalDateTime getApprovedAt() {
+        return approvedAt;
+    }
+
+    public void setApprovedAt(LocalDateTime approvedAt) {
+        this.approvedAt = approvedAt;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
 }
